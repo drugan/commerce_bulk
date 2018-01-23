@@ -1,0 +1,4 @@
+services:
+  commerce_bulk.variations_creator:
+    class: Drupal\commerce_bulk\BulkVariationsCreator
+    arguments: ['@entity_type.manager']

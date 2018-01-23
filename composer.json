@@ -1,0 +1,23 @@
+{
+  "name": "drupal/commerce_bulk",
+  "type": "drupal-module",
+  "description": "Provides a service for bulk creation of Drupal Commerce entities.",
+  "authors": [
+    {
+      "name": "Vladimir Proshin (drugan)",
+      "homepage": "https://www.drupal.org/u/drugan",
+      "role": "Maintainer"
+    }
+  ],
+  "keywords": ["Drupal", "Drupal Commerce"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/commerce_bulk",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://github.com/drugan/commerce_bulk/issues",
+    "source": "https://github.com/drugan/commerce_bulk"
+  },
+  "require": {
+        "drupal/readmehelp": "^1.0"
+  }
+}

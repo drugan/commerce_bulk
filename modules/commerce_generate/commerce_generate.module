@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * Contains commerce_generate.module.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ *
+ * Do something with the newly saved product enttity. Note that product must be
+ * saved after making desirable changes.
+ */
+function commerce_generate_commerce_product_insert(EntityInterface $product) {
+  if ($product->commerce_generate) {
+    // $form_values = $product->commerce_generate;
+    // ...
+    // $product->save();
+  }
+}

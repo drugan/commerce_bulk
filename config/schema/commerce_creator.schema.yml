@@ -1,0 +1,31 @@
+field.widget.settings.commerce_creator_sku:
+  type: mapping
+  label: 'Commerce Creator SKU format settings'
+  mapping:
+    custom_label:
+      type: label
+      label: 'Custom label'
+    uniqid_enabled:
+      type: boolean
+      label: 'Enable unique auto SKU values generation'
+    more_entropy:
+      type: boolean
+      label: 'More unique'
+    hide:
+      type: boolean
+      label: 'Hide SKU'
+    prefix:
+      type: label
+      label: 'SKU prefix'
+    suffix:
+      type: label
+      label: 'SKU suffix'
+    size:
+      type: integer
+      label: 'Size of textfield'
+    placeholder:
+      type: label
+      label: 'Placeholder'
+    maximum:
+      type: integer
+      label: 'The maximum of SKU values in one go'

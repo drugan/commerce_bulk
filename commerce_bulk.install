@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * @file
+ * Install and uninstall functions for the commerce_bulk module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function commerce_bulk_install() {
+  $config = \Drupal::configFactory();
+  $all = $config->listAll('core.entity_form_display.commerce_product_variation.');
+
+  foreach ($all as $name) {
+    $variation = $config->getEditable($name);
+    $sku = $variation->get('content.sku');
+    $sku['type'] = 'commerce_bulk_sku';
+    $sku['settings'] += [
+      'custom_label' => "",
+      'uniqid_enabled' => TRUE,
+      'more_entropy' => FALSE,
+      'hide' => FALSE,
+      'prefix' => "sku-",
+      'suffix' => "",
+      'maximum' => 500,
+    ];
+    $variation->set('content.sku', $sku);
+    $variation->save();
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function commerce_bulk_uninstall() {
+  $config = \Drupal::configFactory();
+  $all = $config->listAll('core.entity_form_display.commerce_product_variation.');
+
+  foreach ($all as $name) {
+    $variation = $config->getEditable($name);
+    $sku = $variation->get('content.sku');
+    $sku['type'] = 'string_textfield';
+    unset(
+      $sku['settings']['custom_label'],
+      $sku['settings']['uniqid_enabled'],
+      $sku['settings']['more_entropy'],
+      $sku['settings']['hide'],
+      $sku['settings']['prefix'],
+      $sku['settings']['suffix'],
+      $sku['settings']['maximum']
+    );
+    $variation->set('content.sku', $sku);
+    $variation->save();
+  }
+}
