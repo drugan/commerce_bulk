@@ -16,6 +16,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\commerce_price\Price;
 use Drupal\commerce_bulk\BulkVariationsCreatorInterface;
+use Drupal\Core\Session\UserSession;
 
 /**
  * Provides a GenerateProducts plugin.
@@ -87,6 +88,13 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
    * @var \Drupal\commerce_bulk\BulkVariationsCreatorInterface
    */
   protected $creator;
+
+  /**
+   * The Drush batch flag.
+   *
+   * @var bool
+   */
+  protected $drushBatch;
 
   /**
    * Constructs a new GenerateProducts object.
@@ -344,8 +352,8 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
    * {@inheritdoc}
    */
   private function generateProducts($values) {
-    $values['product_types'] = array_filter($values['product_types']);
-    $values['stores'] = array_filter($values['stores']);
+    $values['product_types'] = array_filter((array) $values['product_types']);
+    $values['stores'] = array_filter((array) $values['stores']);
     if (!empty($values['kill']) && ($values['product_types'] || $values['stores'])) {
       $this->productKill($values);
     }
@@ -378,15 +386,17 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
     $min = bccomp($min, $max) === -1 ? $min : $max;
     $max = bccomp($max, $min) === 1 ? $max : $min;
     if (bccomp($min, $max) === -1) {
-      // http://php.net/manual/function.mt-getrandmax.php
-      $min_calc = bcadd($min, mt_rand());
-      $min_calc = bcdiv($min_calc, mt_getrandmax());
-      $number = $values['price_number'] = bcmul($min_calc, bcsub($max, $min));
+      $min_decimals = explode('.', $min);
+      $min_decimals = isset($min_decimals[1]) ? $min_decimals[1] + 0 : 1;
+      $max_decimals = explode('.', $max);
+      $max_decimals = isset($max_decimals[1]) ? $max_decimals[1] + 0 : 99;
+      $decimals = rand(($min_decimals ?: 1), ($max_decimals?: 99));
+      $decimals = $decimals < 10 ? rand(0, 1) . $decimals : $decimals;
+      $number = $values['price_number'] = rand($min, $max) . '.' . $decimals;
     }
     else {
       $number = $values['price_number'] = bcadd($max, 0);
     }
-
     // If some crazy numbers are submited then it may return scientific notation
     // number which is not supported by this module. So, to prevent crashes
     // return something sensible instead.
@@ -421,22 +431,24 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
    * {@inheritdoc}
    */
   private function batchGenerateProducts($values) {
-    // Setup the batch operations and save the variables.
-    $operations[] = [
-      'devel_generate_operation', [$this, 'batchPrepareroduct', $values],
-    ];
 
+    if (!$this->drushBatch) {
+      // Setup the batch operations and save the variables.
+      $operations[] = [
+        'commerce_generate_operation', [$this, 'batchPrepareroduct', $values],
+      ];
+    }
     // Add the kill operation.
     if ($values['kill']) {
       $operations[] = [
-        'devel_generate_operation', [$this, 'batchProductKill', $values],
+        'commerce_generate_operation', [$this, 'batchProductKill', $values],
       ];
     }
 
     // Add the operations to create the products.
     for ($num = 0; $num < $values['num']; $num++) {
       $operations[] = [
-        'devel_generate_operation', [
+        'commerce_generate_operation', [
           $this,
           'batchGenerateSaveProduct',
           $values,
@@ -444,38 +456,55 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
       ];
     }
 
-    // Set the batch.
     $batch = [
       'title' => $this->t('Generating Products'),
       'operations' => $operations,
-      'finished' => 'devel_generate_batch_finished',
-      'file' => drupal_get_path('module', 'devel_generate') . '/devel_generate.batch.inc',
+      'finished' => 'commerce_generate_batch_finished',
     ];
+
     batch_set($batch);
+    if ($this->drushBatch) {
+      drush_backend_batch_process();
+    }
   }
 
   /**
    * {@inheritdoc}
    */
   public function batchPrepareroduct($vars, &$context) {
-    $context['results'] = $vars;
-    $context['results']['num'] = 0;
-    $this->prepareGenerateProduct($context['results']);
+    if ($this->drushBatch) {
+      $this->prepareGenerateProduct($vars);
+    }
+    else {
+      $context['results'] = $vars;
+      $context['results']['num'] = 0;
+      $this->prepareGenerateProduct($context['results']);
+    }
   }
 
   /**
    * {@inheritdoc}
    */
-  public function batchGenerateSaveProduct(&$vars, &$context) {
-    $this->generateSaveProduct($context['results']);
-    $context['results']['num']++;
+  public function batchGenerateSaveProduct($vars, &$context) {
+    if ($this->drushBatch) {
+      $this->generateSaveProduct($vars);
+    }
+    else {
+      $this->generateSaveProduct($context['results']);
+      $context['results']['num']++;
+    }
   }
 
   /**
    * {@inheritdoc}
    */
   public function batchProductKill($vars, &$context) {
-    $this->productKill($context['results']);
+    if ($this->drushBatch) {
+      $this->productKill($vars);
+    }
+    else {
+      $this->productKill($context['results']);
+    }
   }
 
   /**
@@ -483,12 +512,12 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
    */
   protected function prepareGenerateProduct(&$results) {
     if ($results['owner']) {
-      $results['users'] = [$results['owner']];
+      $users = [$results['owner']];
     }
     else {
       $users = $this->getUsers();
-      $results['users'] = $users;
     }
+    $results['users'] = $users;
   }
 
   /**
@@ -506,7 +535,7 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
       'price' => new Price($this->getRandomPrice($results), $code),
     ];
     $product_type = array_rand(array_filter($results['product_types']));
-    // Anonymous user cannot be assigned as product owner.
+    // Anonymous user (uid = 0) cannot be assigned as product owner.
     $uid = $users[array_rand($users)] ?: $users[array_rand($users)];
 
     $product = $this->productStorage->create([
@@ -577,8 +606,12 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
    * Determine language based on $results.
    */
   protected function getLangcode($results) {
-    if (isset($results['add_language'])) {
+    if (!empty($results['add_language'])) {
       $langcodes = $results['add_language'];
+      $langcode = $langcodes[array_rand($langcodes)];
+    }
+    elseif (!empty($results['languages']['add_language'])) {
+      $langcodes = $results['languages']['add_language'];
       $langcode = $langcodes[array_rand($langcodes)];
     }
     else {
@@ -601,73 +634,121 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
 
   /**
    * {@inheritdoc}
-   *
-   * @todo Drush command a bit later.
    */
   public function validateDrushParams($args, $options = []) {
-    $add_language = $this->isDrush8() ? drush_get_option('languages') : $options['languages'];
-    if (!empty($add_language)) {
-      $add_language = explode(',', str_replace(' ', '', $add_language));
-      // Intersect with the enabled languages to make sure the language args
-      // passed are actually enabled.
-      $values['values']['add_language'] = array_intersect($add_language, array_keys($this->languageManager->getLanguages(LanguageInterface::STATE_ALL)));
+    $switcher = \Drupal::service('account_switcher');
+    $switcher->switchTo(new UserSession([
+      'uid' => 1,
+      'roles' => ['authenticated', 'administrator'],
+    ]));
+    // Without $switcher the store storage may be inaccessible in some set up.
+    $stores = $product_types = [];
+    foreach ($this->storeStorage->loadMultiple() as $store) {
+      $stores[] = $store->id();
     }
-
-    $values['kill'] = $this->isDrush8() ? drush_get_option('kill') : $options['kill'];
-    $values['title_length'] = 4;
+    foreach ($this->productTypeStorage->loadMultiple() as $type) {
+      $product_types[] = $type->id();
+    }
+    $switcher->switchBack();
+    if (empty($stores)) {
+      throw new \Exception(dt('You do not have any stores to which generated products could be assigned. '));
+    }
+    if (empty($product_types)) {
+      throw new \Exception(dt('You do not have any product types which could be created. '));
+    }
+    $values = [];
+    $default_settings = $this->getDefaultSettings();
     $values['num'] = array_shift($args);
 
-    $all_stores = [];
-    foreach ($this->storeTypeStorage->loadMultiple() as $store) {
-      $all_stores[] = $store->id();
-    }
-    $default_stores = array_intersect(['online'], $all_stores);
-
-    $all_types = [];
-    foreach ($this->productTypeStorage->loadMultiple() as $type) {
-      $all_types[] = $type->id();
-    }
-
-    $default_types = array_intersect(['default'], $all_types);
     if ($this->isDrush8()) {
-      $selected_stores = _convert_csv_to_array(drush_get_option('stores', $default_stores));
-      $selected_types = _convert_csv_to_array(drush_get_option('product-types', $default_types));
+      $keys = [
+        'stores',
+        'product-types',
+        'kill',
+        'batch',
+        'title-prefix',
+        'title-length',
+        'price-min',
+        'price-max',
+        'price-per-variation',
+        'owner',
+        'languages',
+      ];
+      foreach ($keys as $index => $key) {
+        if (!drush_get_option($key)) {
+          unset($keys[$index]);
+        }
+        else {
+          $keys[$index] = str_replace('-', '_', $key);
+
+          if ($keys[$index] == 'kill') {
+            $values['kill'] = TRUE;
+            unset($keys[$index]);
+          }
+          elseif ($keys[$index] == 'price_per_variation') {
+            $values['price_per_variation'] = TRUE;
+            unset($keys[$index]);
+          }
+        }
+      }
+      $values += array_combine($keys, $args);
+      if (!empty($values['stores'])) {
+        $values['stores'] = _convert_csv_to_array($values['stores']);
+      }
+      if (!empty($values['product_types'])) {
+        $values['product_types'] = _convert_csv_to_array($values['product_types']);
+      }
+      if (!empty($values['languages'])) {
+        $values['languages'] = _convert_csv_to_array($values['languages']);
+      }
+      $values += $default_settings;
     }
     else {
-      $selected_stores = StringUtils::csvToArray($options['stores'] ?: $default_stores);
-      $selected_types = StringUtils::csvToArray($options['product-types'] ?: $default_types);
+      if (!empty($options['stores'])) {
+        $values['stores'] = StringUtils::csvToArray($options['stores']);
+      }
+      if (!empty($options['product_types'])) {
+        $values['product_types'] = StringUtils::csvToArray($options['product_types']);
+      }
+      if (!empty($options['languages'])) {
+        $values['languages'] = StringUtils::csvToArray($options['languages']);
+      }
+      $values += $options;
+      $values += $default_settings;
     }
 
-    if (empty($selected_stores)) {
-      throw new \Exception(dt('No stores available'));
+    if (!empty($values['languages'])) {
+      $values['languages']['add_language'] = array_intersect($values['languages'], array_keys($this->languageManager->getLanguages(LanguageInterface::STATE_ALL)));
     }
 
-    if (empty($selected_types)) {
-      throw new \Exception(dt('No product types available'));
+    if (!empty($values['stores'])) {
+      $selected_stores = array_values(array_intersect($values['stores'], $stores));
+      if ($selected_stores != $values['stores']) {
+        throw new \Exception(dt('One or more stores have been entered that don\'t exist on this site'));
+      }
     }
-
-    $values['stores'] = array_combine($selected_stores, $selected_stores);
-    $stores = array_filter($values['stores']);
-
-    if (!empty($values['kill']) && ($values['num'] == 0) && empty($stores)) {
-      throw new \Exception(dt('Please provide store ID (--stores) and / or product type (--product-types) in which you want to delete products.'));
+    elseif (!$values['kill'] && $values['num'] > 0) {
+      $values['stores'] = $stores;
     }
-
-    // Checks for any missing store ID before generating products.
-    if (array_diff($stores, $all_stores)) {
-      throw new \Exception(dt('One or more stores have been entered that don\'t exist on this site'));
+    if (!empty($values['product_types'])) {
+      $selected_product_types = array_values(array_intersect($values['product_types'], $product_types));
+      if ($selected_product_types != $values['product_types']) {
+        throw new \Exception(dt('One or more product types have been entered that don\'t exist on this site'));
+      }
     }
-
-    $values['product_types'] = array_combine($selected_types, $selected_types);
-    $product_types = array_filter($values['product_types']);
-
-    if (!empty($values['kill']) && ($values['num'] > 0) && empty($product_types)) {
-      throw new \Exception(dt('Please provide product type (--product-types) in which you want to delete products.'));
+    elseif ($values['num'] > 0) {
+      $values['product_types'] = $product_types;
     }
-
-    // Checks for any missing content types before generating products.
-    if (array_diff($product_types, $all_types)) {
-      throw new \Exception(dt('One or more product types have been entered that don\'t exist on this site'));
+    if (!empty($values['stores'])) {
+      $values['stores'] = array_combine($values['stores'], $values['stores']);
+    }
+    if (!empty($values['product_types'])) {
+      $values['product_types'] = array_combine($values['product_types'], $values['product_types']);
+    }
+    $values['price_number'] = '1.23';
+    if ($values['num'] > 0 && $values['batch'] > 1 && $values['num'] >= $values['batch']) {
+      $this->drushBatch = TRUE;
+      $this->prepareGenerateProduct($values);
     }
 
     return $values;

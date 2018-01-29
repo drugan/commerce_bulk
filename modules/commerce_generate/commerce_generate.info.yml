@@ -7,5 +7,5 @@ tags:
  - developer
 dependencies:
  - drupal:commerce_bulk
- - devel_generate
+ - drupal:devel_generate
  - drupal:readmehelp
