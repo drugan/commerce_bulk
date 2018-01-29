@@ -8,7 +8,7 @@ the [Commerce Generate ↗](https://github.com/drugan/commerce_bulk/tree/8.x-1.x
 submodule is enabled. Both modules were created as a result of the
 following *Drupal Commerce* issue:
 
-[Issue #2755529 by ndf: Product variant bulk creation ↗](https://www.drupal.org/node/2755529)
+[Issue \#2755529 by ndf: Product variant bulk creation ↗](https://www.drupal.org/node/2755529)
 
 - [admin/help/commerce_bulk#info-for-developers](#info-for-developers "Info for developers")
 - [admin/help/commerce_bulk#module-author](#module-author "Module author")
@@ -94,14 +94,16 @@ to automatically create products with all possible or just a subset of
 variations. It's easy, just see how the *Commerce Generate* `GenerateProducts`
 plugin does it.
 
-@PHPFILE: modules/contrib/commerce_bulk/modules/commerce_generate/src/Plugin/DevelGenerate/GenerateProducts.php LINE:512 PADD:27 :PHPFILE@
+@PHPFILE: modules/contrib/commerce_bulk/modules/commerce_generate/src/Plugin/DevelGenerate/GenerateProducts.php LINE:541 PADD:28 :PHPFILE@
 
 Also, see how the service is called in the `commerce_bulk.module` file.
 
 @PHPFILE: commerce_bulk.module LINE:48 PADD:4 :PHPFILE@
 
-Ping me on https://www.drupal.org or https://drupal.slack.com `#commerce`
-channel if you have any questions on the service.
+The generated SKU might be altered by imlementing the `hook_TYPE_alter()`.
+
+@PHPFILE: commerce_bulk.module LINE:21 PADD:8 :PHPFILE@
+
 
 ###### Module author:
 ```

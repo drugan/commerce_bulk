@@ -32,7 +32,7 @@ drush generate-products 10 --stores 1,2 --product-types my_type,their_type --kil
       'stores' => 'A comma delimited list of store IDs to assign generated products. Defaults to all stores.',
       'product-types' => 'A comma delimited list of product types to create. Defaults to all types.',
       'kill' => 'Delete all products before generating new ones.',
-      'batch' => 'The treshold at which to start batch products creation process instead of doing this in one go.',
+      'batch' => 'The threshold at which to start batch products creation process instead of doing this in one go.',
       'title-prefix' => 'The word to prepend to a randomly generated product title.',
       'title-length' => 'The maximum number of words in titles.',
       'price-min' => 'The minimum of the randomly generated price (without currency code)',
