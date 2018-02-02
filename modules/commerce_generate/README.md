@@ -14,23 +14,33 @@ the *Devel Generate* module.
 
 ![Generate Products Form](images/generate-products-form.png "Generate Products Form")
 
+________________________________________________________________________________
+
 The products to generate might be configured.
 
 ![Generate Products Config](images/generate-products-config.png "Generate Products Config")
 
+________________________________________________________________________________
+
 ![Generate Products List](images/generate-products-list.png "Generate Products List")
+
+________________________________________________________________________________
 
 The same as the parent module does the *Generate Products* also generates dummy
 images both for the product itself as well as for each product variation if the
-image field is added to a variation.
+image field is added to a variation type.
 
 ![Generate Products Image](images/generate-products-image.png "Generate Products Image")
+
+________________________________________________________________________________
 
 You may also use *Drush 8.x* command for generating products. As the command is
 highly configurable it is recommended to look
 into `drush help generate-products` before running it.
 
 ![Help Generate Products](images/help-generate-products.png "Help Generate Products")
+
+________________________________________________________________________________
 
 For example, create 50 products using all existing stores and product types with
 the following default values:
@@ -57,36 +67,41 @@ drush gprod 50
 ```
 
 Note that because the number of products 50 is geater than `--batch 10` default
-value then the whole process will be done at the backend using batch API.
-
+value, then the whole process will be run at the backend using batch API.
+________________________________________________________________________________
 
 Create 1 product for the store with ID *3*, of the
-type *my_pizza_product_type* but first delete all products of this type which
-assigned to the store:
+type `my_pizza_product_type` but first delete all products of this type which
+were assigned to the store previously:
 
 ```
 drush gprod 1 --stores 3 --product-types my_pizza_product_type --kill
 ```
+________________________________________________________________________________
 
-Delete all products of
-types *my_t_shirt_product_type* and *my_jeans_product_type* existing on the
-site:
+Delete all products of the
+types `my_t_shirt_product_type` and `my_jeans_product_type`:
 
 ```
 drush genpr 0 --product-types my_t_shirt_product_type,my_jeans_product_type --kill
 ```
 Note that there is should not be space between comma separated option values.
+________________________________________________________________________________
+
 
 Delete all products of any type assigned to the store with ID *2*:
 
 ```
 drush genpr 0 --stores 2 --kill
 ```
+________________________________________________________________________________
 
 The newly generated products might be altered by implementing
 the `hook_ENTITY_TYPE_insert()` in your custom module.
 
 @PHPFILE: commerce_generate.module LINE:17 PADD:6 :PHPFILE@
+
+________________________________________________________________________________
 
 
 ## TODO
@@ -110,9 +125,11 @@ the [admin/commerce/config/product-variation-types#](#0
 - `Add sample product attribute` button on the [admin/commerce/product-attributes#](#0
 "admin/commerce/product-attributes") page.
 
+________________________________________________________________________________
+
 ###### Module author:
 ```
-  Vladimir Proshin (drugan)
+  Vlad Proshin (drugan)
   [proshins@gmail.com](proshins@gmail.com)
   [https://drupal.org/u/drugan](https://drupal.org/u/drugan)
 ```
