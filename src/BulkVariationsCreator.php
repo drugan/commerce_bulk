@@ -394,20 +394,17 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
   public function getAttributeFieldOptionIds(ProductVariation $variation) {
     $count = 1;
     $field_options = $fields = $ids = $options = [];
-    foreach ($this->getAttributeFieldNames($variation) as $field_name) {
+    foreach ($this->getAttributeFieldNames($variation) as $field_name => $values) {
       $definition = $variation->get($field_name)->getFieldDefinition();
-      $fields[$field_name] = $definition->getFieldStorageDefinition()
-        ->getOptionsProvider('target_id', $variation)
-        ->getSettableOptions(\Drupal::currentUser());
       $ids[$field_name] = $options[$field_name] = [];
-      foreach ($fields[$field_name] as $key => $value) {
+      foreach ($values as $key => $value) {
         if (is_array($value) && $keys = array_keys($value)) {
           $ids[$field_name] = array_unique(array_merge($ids[$field_name], $keys));
           $options[$field_name] += $value;
         }
-        elseif ($keys = array_keys($fields[$field_name])) {
+        elseif ($keys = array_keys($values)) {
           $ids[$field_name] = array_unique(array_merge($ids[$field_name], $keys));
-          $options[$field_name] += $fields[$field_name];
+          $options[$field_name] += $values;
         }
         // Optional fields need '_none' id as a possible choice.
         !$definition->isRequired() && !in_array('_none', $ids[$field_name]) && array_unshift($ids[$field_name], '_none');
@@ -430,8 +427,19 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
   public function getAttributeFieldNames(ProductVariation $variation) {
     $attribute_field_manager = \Drupal::service('commerce_product.attribute_field_manager');
     $field_map = $attribute_field_manager->getFieldMap($variation->bundle());
+    $attribute_ids = array_unique(array_column($field_map, 'attribute_id'));
+    $field_names = array_unique(array_column($field_map, 'field_name'));
+    $storage = \Drupal::entityTypeManager()->getStorage('commerce_product_attribute_value');
+    $names = [];
+    foreach (array_combine($attribute_ids, $field_names) as $attribute_id => $field_name) {
+      $values = [];
+      foreach ($storage->loadMultipleByAttribute($attribute_id) as $id => $value) {
+        $values[$id] = $value->getName();
+      }
+      $names[$field_name] = $values;
+    }
 
-    return array_unique(array_column($field_map, 'field_name'));
+    return $names;
   }
 
 }

@@ -97,8 +97,9 @@ function commerce_bulk_field_widget_form_alter(&$element, FormStateInterface $fo
           if ($ief) {
             $i++;
             foreach ($all['not_used_combination'] as $field_name => $value) {
+              $definition = $variation->getFieldDefinition($field_name);
               // Do respect the default value defined on the attribute field.
-              if (empty($variation->getFieldDefinition($field_name)->getDefaultValueLiteral())) {
+              if (empty($definition->getDefaultValueLiteral())) {
                 $element['alter_data_' . $i] = [
                   '#parents' => [
                     'form',
@@ -107,6 +108,7 @@ function commerce_bulk_field_widget_form_alter(&$element, FormStateInterface $fo
                     'widget',
                   ],
                   '#value' => $value == '_none' ? [] : ['target_id' => $value],
+                  '#required' => $definition->isRequired(),
                 ];
                 $i++;
               }
