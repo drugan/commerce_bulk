@@ -1,4 +1,4 @@
-field.widget.settings.commerce_creator_sku:
+field.widget.settings.commerce_bulk_sku:
   type: mapping
   label: 'Commerce Creator SKU format settings'
   mapping:
