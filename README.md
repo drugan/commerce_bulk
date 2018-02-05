@@ -5,12 +5,20 @@ Provides a service for bulk creation of *Drupal Commerce* entities. For now just
 product variations could be bulk created on a product add or edit form. Also,
 dummy products could be bulk generated if
 the [Commerce Generate ↗](https://github.com/drugan/commerce_bulk/tree/8.x-1.x/modules/commerce_generate)
-submodule is enabled. Both modules were created as a result of the
-following *Drupal Commerce* issue:
+submodule is enabled.
 
-[Issue \#2755529 by ndf: Product variant bulk creation ↗](https://www.drupal.org/node/2755529)
+> Tip: you can see this file in your browser by clicking
+the [admin/help#](#0 "? Help") link at the right of the *Admin toolbar* and then
+the [admin/help/commerce_bulk#](#0 "Commerce Bulk") link in the list.
+
+The module was created as a solution for the following *Drupal Commerce* issue:
+
+[Issue \#2755529: Product variant bulk creation ↗](https://www.drupal.org/node/2755529)
+
+________________________________________________________________________________
 
 - [admin/help/commerce_bulk#info-for-developers](#info-for-developers "Info for developers")
+- [admin/help/commerce_bulk#todo](#todo "TODO")
 - [admin/help/commerce_bulk#module-author](#module-author "Module author")
 - [Commerce Bulk on drupal.org ↗](https://www.drupal.org/project/commerce_bulk)
 - [Commerce Bulk on github.com ↗](https://github.com/drugan/commerce_bulk)
@@ -125,6 +133,12 @@ The generated SKU might be altered by imlementing the `hook_TYPE_alter()`.
 
 ________________________________________________________________________________
 
+## TODO
+
+- Apply mechanism for automatically adding variations images based on a certain
+criteria.
+- Bulk edit / remove variatons in a tableselect element (tab or pop-up).
+- [Issue #2923799: Allow product variations to be named after the product name and variation title](https://www.drupal.org/project/commerce/issues/2923799)
 
 ###### Module author:
 ```
