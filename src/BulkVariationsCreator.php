@@ -123,7 +123,6 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
   public function createProductVariation(Product $product, array $variation_custom_values = []) {
     $combination = [];
     $variation = $this->getProductVariation($product);
-    $field = $this->getAttributeFieldOptionIds($variation);
     if (($all = $this->getAttributesCombinations([$variation])) && $all['not_used_combinations']) {
       $combination = reset($all['not_used_combinations']);
       foreach ($combination as $field_name => $id) {
@@ -222,7 +221,6 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
     $prefix = isset($prefix) ? $prefix : '';
     $suffix = isset($suffix) ? $suffix : '';
     $more_entropy = isset($more_entropy) ? $more_entropy : FALSE;
-    $fix = ['prefix' => $prefix, 'suffix' => $suffix];
     $module_handler = \Drupal::moduleHandler();
     $clone = clone $all['last_variation'];
     foreach ($all['not_used_combinations'] as $combination) {
@@ -393,11 +391,11 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
    */
   public function getAttributeFieldOptionIds(ProductVariation $variation) {
     $count = 1;
-    $field_options = $fields = $ids = $options = [];
+    $field_options = $ids = $options = [];
     foreach ($this->getAttributeFieldNames($variation) as $field_name => $values) {
       $definition = $variation->get($field_name)->getFieldDefinition();
       $ids[$field_name] = $options[$field_name] = [];
-      foreach ($values as $key => $value) {
+      foreach ($values as $value) {
         if (is_array($value) && $keys = array_keys($value)) {
           $ids[$field_name] = array_unique(array_merge($ids[$field_name], $keys));
           $options[$field_name] += $value;
@@ -427,16 +425,21 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
   public function getAttributeFieldNames(ProductVariation $variation) {
     $attribute_field_manager = \Drupal::service('commerce_product.attribute_field_manager');
     $field_map = $attribute_field_manager->getFieldMap($variation->bundle());
-    $attribute_ids = array_unique(array_column($field_map, 'attribute_id'));
-    $field_names = array_unique(array_column($field_map, 'field_name'));
+    $attribute_ids = array_column($field_map, 'attribute_id');
+    $field_names = array_column($field_map, 'field_name');
     $storage = \Drupal::entityTypeManager()->getStorage('commerce_product_attribute_value');
-    $names = [];
-    foreach (array_combine($attribute_ids, $field_names) as $attribute_id => $field_name) {
+    $names = $fields = [];
+    foreach ($field_names as $index => $name) {
+      $fields[$name][] = $attribute_ids[$index];
+    }
+    foreach ($fields as $field_name => $ids) {
       $values = [];
-      foreach ($storage->loadMultipleByAttribute($attribute_id) as $id => $value) {
-        $values[$id] = $value->getName();
+      foreach ($ids as $attribute_id) {
+        foreach ($storage->loadMultipleByAttribute($attribute_id) as $id => $value) {
+          $values[$id] = $value->getName();
+        }
+        $names[$field_name] = $values;
       }
-      $names[$field_name] = $values;
     }
 
     return $names;
