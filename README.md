@@ -138,7 +138,9 @@ ________________________________________________________________________________
 - Apply mechanism for automatically adding variations images based on a certain
 criteria.
 - Bulk edit / remove variatons in a tableselect element (tab or pop-up).
-- [Issue #2923799: Allow product variations to be named after the product name and variation title](https://www.drupal.org/project/commerce/issues/2923799)
+- [Issue #2923799: Allow product variations to be named after the product name and variation title ↗](https://www.drupal.org/project/commerce/issues/2923799)
+- Create variations in a bulk process. [Example ↗](https://www.drupal.org/project/commerce/issues/2902882#comment-12486526)
+- Add pager to the varaitions list.
 
 ###### Module author:
 ```
