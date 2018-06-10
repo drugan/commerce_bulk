@@ -14,7 +14,23 @@ function commerce_bulk_install() {
 
   foreach ($all as $name) {
     $variation = $config->getEditable($name);
-    $sku = $variation->get('content.sku');
+    if (!$variation->get('hidden.sku')) {
+      $sku = $variation->get('content.sku');
+    }
+    else {
+      $hidden = $variation->get('hidden');
+      unset($hidden['sku']);
+      $variation->set('hidden', $hidden);
+      $sku = [
+        'settings' => [
+          'size' => 60,
+          'placeholder' => "",
+        ],
+        'weight' => -4,
+        'region' => 'content',
+        'third_party_settings' => [],
+      ];
+    }
     $sku['type'] = 'commerce_bulk_sku';
     $sku['settings'] += [
       'custom_label' => "",
