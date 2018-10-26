@@ -165,11 +165,13 @@ function commerce_bulk_field_widget_form_alter(&$element, FormStateInterface $fo
       break;
 
     case ($field_name == 'sku'):
+      $bundle = empty($context['form']['#bundle']) ? '' : $context['form']['#bundle'];
       if (!$sku_settings = $form_state->getValue('sku_settings')) {
         $creator = \Drupal::service('commerce_bulk.variations_creator');
         $entity = $form_state->getFormObject()->getEntity();
         $product = $entity instanceof BulkProductVariation ? $entity->getProduct() : $entity;
         $variation = $creator->getProductVariation($product);
+        $bundle = $bundle ?: $variation->bundle();
         $sku_settings = $creator::getSkuwidget($variation)->getSettings();
       }
       extract($sku_settings);
@@ -178,7 +180,7 @@ function commerce_bulk_field_widget_form_alter(&$element, FormStateInterface $fo
         $element['value']['#value'] = $element['value']['#default_value'];
       }
       else {
-        $setup_link = t('<a href=":href" target="_blank">Set up default SKU.</a>', [':href' => '/admin/commerce/config/product-variation-types/' . $variation->bundle() . '/edit/form-display']);
+        $setup_link = t('<a href=":href" target="_blank">Set up default SKU.</a>', [':href' => '/admin/commerce/config/product-variation-types/' . $bundle . '/edit/form-display']);
         $element['value']['#description'] = implode(' ', [$element['value']['#description'], $setup_link]);
       }
       break;
