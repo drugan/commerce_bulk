@@ -1,3 +1,27 @@
+action.configuration.commerce_bulk_variation_duplicate:
+  type: action_configuration_default
+  label: 'Configuration for the Duplicate variation action'
+action.configuration.commerce_bulk_variation_priceadjust:
+  type: action_configuration_default
+  label: 'Configuration for the Adjust price action'
+action.configuration.commerce_bulk_variation_zdelete:
+  type: action_configuration_default
+  label: 'Configuration for the Delete variations action'
+action.configuration.commerce_bulk_variation_hook:
+  type: action_configuration_default
+  label: 'Configuration for the Pass to hook action'
+action.configuration.commerce_bulk_variation_priceset:
+  type: action_configuration_default
+  label: 'Configuration for the Set price action'
+action.configuration.commerce_bulk_variation_sku:
+  type: action_configuration_default
+  label: 'Configuration for the Change SKUs action'
+action.configuration.commerce_bulk_variation_status:
+  type: action_configuration_default
+  label: 'Configuration for the Change status action'
+action.configuration.commerce_bulk_variation_top:
+  type: action_configuration_default
+  label: 'Configuration for the Move to top action'
 field.widget.settings.commerce_bulk_sku:
   type: mapping
   label: 'Commerce Creator SKU format settings'

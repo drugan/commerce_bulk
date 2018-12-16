@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - commerce_product
+    - action
+id: commerce_bulk_variation_zdelete
+label: 'Delete variations'
+type: commerce_product_variation
+plugin: commerce_bulk_variation_zdelete
+configuration: {  }

@@ -1,0 +1,6 @@
+# entity.commerce_product_variation.add_variations:
+#   route_name: entity.commerce_product_variation.create_variations
+#   title: 'Bulk Add Variations'
+#   appears_on:
+#     - entity.commerce_product_variation.collection
+

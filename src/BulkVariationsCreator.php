@@ -87,6 +87,10 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
       $key_exists = NULL;
       $old_data = NestedArray::getValue($element, $parents, $key_exists);
       if (is_array($old_data)) {
+        if (isset($element['#value'])) {
+          $old_data['#value'] = $old_data['#default_value'] = $data['#value'];
+          $data = $old_data;
+        }
         $data = array_replace($old_data, $data);
       }
       elseif ($key_exists && !in_array($old_data, $data)) {
@@ -156,16 +160,21 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
   /**
    * {@inheritdoc}
    */
-  public function createAllProductVariations(Product $product, array $variation_custom_values = []) {
-    $variations = $product->getVariations();
+  public function createAllProductVariations(Product $product, array $variation_custom_values = [], array $all = []) {
     $timestamp = time();
-    if (empty($variations) || !empty($variation_custom_values)) {
-      $variations[] = $this->createProductVariation($product, $variation_custom_values);
-      $timestamp--;
+    if (!$all) {
+      $variations = $product->getVariations();
+      if (empty($variations) || !empty($variation_custom_values)) {
+        $variations[] = $this->createProductVariation($product, $variation_custom_values);
+        $timestamp--;
+      }
+      if (!$all = $this->getAttributesCombinations($variations)) {
+        return;
+      }
     }
-
-    if (!$all = $this->getAttributesCombinations($variations)) {
-      return;
+    else {
+      $variations = $all['variations'];
+      $all = $all['all'];
     }
 
     // Improve perfomance by getting sku settings just once instead of
@@ -182,11 +191,10 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
         ->setChangedTime($timestamp)
         ->setCreatedTime($timestamp);
       $sku = \uniqid($prefix, $more_entropy) . $suffix;
-      unset($settings['combination']);
       $settings['combination'] = $combination;
       $module_handler->alter("bulk_creator_sku", $sku, $settings, $clone);
       $variation->setSku($sku);
-      foreach ($combination as $field_name => $id) {
+      foreach ($settings['combination'] as $field_name => $id) {
         $variation->get($field_name)->setValue(['target_id' => $id == '_none' ? NULL : $id]);
       }
       $variation->updateOriginalValues();

@@ -5,6 +5,8 @@ namespace Drupal\commerce_bulk\Plugin\Field\FieldWidget;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\StringTextfieldWidget;
+use Drupal\commerce_bulk\Entity\BulkProductVariation;
+use Drupal\commerce_product\Entity\Product;
 
 /**
  * Plugin implementation of the 'commerce_bulk_sku' widget.
@@ -140,17 +142,56 @@ class BulkSkuWidget extends StringTextfieldWidget {
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
+    $value = isset($items[$delta]->value) ? $items[$delta]->value : NULL;
+    $settings = $this->getSettings();
     $custom_label = $this->getSetting('custom_label');
     $element['#title'] = !empty($custom_label) ? $custom_label : $element['#title'];
+    $entity = $form_state->getFormObject()->getEntity();
+    $variations = $variation = NULL;
+    if ($entity instanceof BulkProductVariation) {
+      $variation = $entity;
+      $product = $variation->getProduct();
+      $variations = $product->getVariations();
+    }
+    elseif ($entity instanceof Product) {
+      $product = $entity;
+      $variations = $product->getVariations();
+      $variation = end($variations);
+    }
+    if ($variation && !$variation->id()) {
+      $creator = \Drupal::service('commerce_bulk.variations_creator');
+      $all = $creator->getNotUsedAttributesCombination($variations ?: [$variation]);
+      if ($price = $all['last_variation']->getPrice()) {
+        $form['price']['widget'][0]['#default_value'] = $price->toArray();
+      }
+      if ($price = $all['last_variation']->getListPrice()) {
+        $form['list_price']['widget'][0]['has_value']['#default_value'] = TRUE;
+        $form['list_price']['widget'][0]['value']['#default_value'] = $price->toArray();
+      }
+      if ($all['not_used_combination']) {
+        foreach ($all['not_used_combination'] as $attribute_name => $id) {
+          $form[$attribute_name]['widget']['#default_value'] = [$id];
+          $form[$attribute_name]['widget']['#value'] = [$id];
+        }
+      }
+    }
 
-    $element['value'] = $element + [
-      '#type' => 'textfield',
-      '#default_value' => isset($items[$delta]->value) ? $items[$delta]->value : NULL,
-      '#size' => $this->getSetting('size'),
-      '#placeholder' => $this->getSetting('placeholder'),
-      '#maxlength' => $this->getFieldSetting('max_length'),
-      '#attributes' => ['class' => ['js-text-full', 'text-full']],
-    ];
+    if (!empty($settings['uniqid_enabled']) && $settings['hide']) {
+      $element['#type'] = 'value';
+      $element['#value'] = $value;
+    }
+    else {
+      $setup_link = $this->t('<a href=":href" target="_blank">Set up default SKU.</a>', [':href' => '/admin/commerce/config/product-variation-types/' . $variation->bundle() . '/edit/form-display']);
+      $element['#description'] = implode(' ', [$element['#description'], $setup_link]);
+      $element['value'] = $element + [
+        '#type' => 'textfield',
+        '#default_value' => $value,
+        '#size' => $this->getSetting('size'),
+        '#placeholder' => $this->getSetting('placeholder'),
+        '#maxlength' => $this->getFieldSetting('max_length'),
+        '#attributes' => ['class' => ['js-text-full', 'text-full']],
+      ];
+    }
 
     return $element;
   }

@@ -6,3 +6,15 @@ package: Commerce (contrib)
 dependencies:
   - commerce:commerce_checkout
   - drupal:readmehelp
+  - drupal:action
+config_devel:
+  install:
+    - system.action.commerce_bulk_variation_duplicate
+    - system.action.commerce_bulk_variation_hook
+    - system.action.commerce_bulk_variation_priceadjust
+    - system.action.commerce_bulk_variation_priceset
+    - system.action.commerce_bulk_variation_sku
+    - system.action.commerce_bulk_variation_status
+    - system.action.commerce_bulk_variation_top
+    - system.action.commerce_bulk_variation_zdelete
+    - views.view.commerce_bulk_variations_tab
