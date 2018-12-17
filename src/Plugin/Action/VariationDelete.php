@@ -65,13 +65,15 @@ class VariationDelete extends ConfigurableActionBase {
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     if ($form_state->getTriggeringElement()['#id'] != 'edit-cancel') {
-      if ($variations = $form_state->get('variations')) {
-        foreach ($variations as $variation) {
-          $variation->delete();
-        }
+      if ($seleted_variations = $form_state->get('variations')) {
         $product = $form_state->get('product');
-        $product->setVariations($product->getVariations());
-        $product->save();
+        $variations = $product->getVariations();
+        foreach ($variations as $index => $variation) {
+          if (in_array($variation, $seleted_variations)) {
+            unset($variations[$index]);
+          }
+        }
+        $product->setVariations(array_values($variations))->save();
       }
     }
   }
