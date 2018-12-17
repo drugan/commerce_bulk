@@ -177,8 +177,8 @@ class BulkSkuWidget extends StringTextfieldWidget {
     }
 
     if (!empty($settings['uniqid_enabled']) && $settings['hide']) {
-      $element['#type'] = 'value';
-      $element['#value'] = $value;
+      $element['value']['#type'] = 'value';
+      $element['value']['#value'] = $value;
     }
     else {
       $setup_link = $this->t('<a href=":href" target="_blank">Set up default SKU.</a>', [':href' => '/admin/commerce/config/product-variation-types/' . $variation->bundle() . '/edit/form-display']);
