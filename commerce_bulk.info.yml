@@ -4,7 +4,7 @@ description: 'Provides a service for bulk creation of Drupal Commerce entities.'
 core: 8.x
 package: Commerce (contrib)
 dependencies:
-  - commerce:commerce_checkout
+  - commerce:commerce_order
   - drupal:readmehelp
   - drupal:action
 config_devel:
