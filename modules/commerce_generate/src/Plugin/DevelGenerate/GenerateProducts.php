@@ -31,10 +31,12 @@ use Drupal\Core\Session\UserSession;
  *     "kill" = FALSE,
  *     "num" = 1,
  *     "batch" = 10,
- *     "title_prefix" = @Translation("Product"),
+ *     "title_prefix" = @Translation("My Product"),
  *     "title_length" = 4,
  *     "price_min" = "0.01",
  *     "price_max" = "9.99",
+ *     "list_price_min" = "0.01",
+ *     "list_price_max" = "9.99",
  *     "price_per_variation" = FALSE,
  *   }
  * )
@@ -240,24 +242,25 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
       '#title' => $this->t('The title prefix'),
       '#description' => $this->t('The word to prepend to a randomly generated product title.'),
       '#default_value' => $this->getSetting('title_prefix'),
+      '#required' => TRUE,
     ];
 
     $form['title_length'] = [
       '#type' => 'number',
       '#title' => $this->t('Maximum number of words in titles'),
+      '#description' => $this->t('Leave empty for no randomly generated words in title. Useful if you want generate one particular product for further use in production. Note that each product variation title will be prefixed with a product title so, use the title prefix field above to assign desirable title for a product and therefore title prefix for all its variations.'),
       '#default_value' => $this->getSetting('title_length'),
-      '#required' => TRUE,
       '#step' => 1,
       '#min' => 1,
-      '#max' => 255,
+      '#max' => 25,
     ];
 
     $form['price_min'] = [
       '#type' => 'number',
       '#title' => $this->t('The minimum of the randomly generated price.'),
       '#default_value' => $this->getSetting('price_min'),
-      '#min' => '0.01',
       '#step' => '0.01',
+      '#min' => '0.01',
     ];
 
     $form['price_max'] = [
@@ -266,6 +269,22 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
       '#default_value' => $this->getSetting('price_max'),
       '#step' => '0.01',
       '#min' => '0.01',
+    ];
+
+    $form['list_price_min'] = [
+      '#type' => 'number',
+      '#title' => $this->t('The minimum of the randomly generated list price. Leave empty for no list price.'),
+      '#default_value' => $this->getSetting('price_min'),
+      '#step' => '0.01',
+      '#min' => '0',
+    ];
+
+    $form['list_price_max'] = [
+      '#type' => 'number',
+      '#title' => $this->t('The maximum of the randomly generated list price. Leave empty for no list price.'),
+      '#default_value' => $this->getSetting('price_max'),
+      '#step' => '0.01',
+      '#min' => '0',
     ];
 
     $form['price_per_variation'] = [
@@ -295,7 +314,7 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
       '#title' => $this->t('How far back in time should the products be dated?'),
       '#description' => $this->t('Product creation dates will be distributed randomly from the current time, back to the selected time.'),
       '#options' => $options,
-      '#default_value' => 604800,
+      '#default_value' => 3600,
     ];
 
     $options = [];
@@ -380,9 +399,9 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
   /**
    * {@inheritdoc}
    */
-  private function getRandomPrice(&$values) {
-    $min = $values['price_min'];
-    $max = $values['price_max'];
+  private function getRandomPrice(&$values, $list = '') {
+    $min = $values["{$list}price_min"];
+    $max = $values["{$list}price_max"];
     $min = bccomp($min, $max) === -1 ? $min : $max;
     $max = bccomp($max, $min) === 1 ? $max : $min;
     if (bccomp($min, $max) === -1) {
@@ -528,19 +547,22 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
       $results['time_range'] = 0;
     }
     $users = $results['users'];
-    $title = $this->getRandom()->sentences(mt_rand(1, $results['title_length']), TRUE);
+    $title = empty($results['title_length']) ? '' : ' ' . $this->getRandom()->sentences(mt_rand(1, $results['title_length']), TRUE);
     $store = $this->storeStorage->load(array_rand(array_filter($results['stores'])));
     $code = $store->getDefaultCurrencyCode();
     $values = [
       'price' => new Price($this->getRandomPrice($results), $code),
     ];
+    if ($list_price = (!empty($results['list_price_min']) && !empty($results['list_price_max']))) {
+      $values['list_price'] = new Price($this->getRandomPrice($results, 'list_'), $code);
+    }
     $product_type = array_rand(array_filter($results['product_types']));
     // Anonymous user (uid = 0) cannot be assigned as product owner.
     $uid = $users[array_rand($users)] ?: $users[array_rand($users)];
 
     $product = $this->productStorage->create([
       'type' => $product_type,
-      'title' => $results['title_prefix'] ? "{$results['title_prefix']} $title" : $title,
+      'title' => "{$results['title_prefix']}{$title}",
       'uid' => $uid,
       'created' => REQUEST_TIME - mt_rand(0, $results['time_range']),
       'langcode' => $this->getLangcode($results),
@@ -557,6 +579,9 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
       $this->populateFields($variation);
       if ($results['price_per_variation']) {
         $variation->setPrice(new Price($this->getRandomPrice($results), $code));
+        if ($list_price) {
+          $variation->setListPrice(new Price($this->getRandomPrice($results, 'list_'), $code));
+        }
       }
     }
     // Populate all the rest fields with sample values.
