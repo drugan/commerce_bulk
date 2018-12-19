@@ -70,18 +70,21 @@ class VariationDuplicate extends ConfigurableActionBase {
      $values = [];
       foreach ($all['not_used_combinations'] as $index => $combination) {
         foreach ($combination as $key => $value) {
-          $values[$value] = $value;
+          $values[$key][$value] = $value;
         }
       }
       foreach ($options['options'] as $field_name => $value) {
+        $definition = $variation->get($field_name)->getFieldDefinition();
+        if (!$required = $definition->isRequired() && !isset($value['_none'])) {
+          $value = ['_none' => ''] + $value;
+        }
         foreach ($value as $key => $name) {
-          if (!isset($values[$key])) {
+          if (!isset($values[$field_name][$key])) {
             // All combinations for this option are already used.
             unset($value[$key]);
           }
         }
         if ($size = count($value)) {
-          $definition = $variation->get($field_name)->getFieldDefinition();
           $form['attributes'][$field_name] = [
             '#type' => 'select',
             '#title' => $definition->getLabel(),
@@ -90,7 +93,7 @@ class VariationDuplicate extends ConfigurableActionBase {
             '#options' => $value,
             '#size' => $size,
             '#default_value' => array_keys($value),
-            '#required' => $definition->isRequired(),
+            '#required' => $required,
           ];        
         }
       }
