@@ -174,6 +174,8 @@ class BulkSkuWidget extends StringTextfieldWidget {
           $form[$attribute_name]['widget']['#value'] = [$id];
         }
       }
+      $setup_link = $this->t('<a href=":href" target="_blank">Set up default SKU.</a>', [':href' => '/admin/commerce/config/product-variation-types/' . $variation->bundle() . '/edit/form-display']);
+      $element['#description'] = implode(' ', [$element['#description'], $setup_link]);
     }
 
     if (!empty($settings['uniqid_enabled']) && $settings['hide']) {
@@ -181,8 +183,6 @@ class BulkSkuWidget extends StringTextfieldWidget {
       $element['value']['#value'] = $value;
     }
     else {
-      $setup_link = $this->t('<a href=":href" target="_blank">Set up default SKU.</a>', [':href' => '/admin/commerce/config/product-variation-types/' . $variation->bundle() . '/edit/form-display']);
-      $element['#description'] = implode(' ', [$element['#description'], $setup_link]);
       $element['value'] = $element + [
         '#type' => 'textfield',
         '#default_value' => $value,
