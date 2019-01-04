@@ -4,7 +4,7 @@ dependencies:
   module:
     - commerce_price
     - commerce_product
-    - action
+    - user
 id: commerce_bulk_variations_tab
 label: 'Variations Tab'
 module: views
@@ -21,8 +21,9 @@ display:
     position: 0
     display_options:
       access:
-        type: none
-        options: {  }
+        type: perm
+        options:
+          perm: 'administer actions'
       cache:
         type: tag
         options: {  }
@@ -636,6 +637,7 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
+        - user.permissions
       tags: {  }
   commerce_bulk:
     display_plugin: page
@@ -652,4 +654,5 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
+        - user.permissions
       tags: {  }
