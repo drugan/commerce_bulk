@@ -171,7 +171,6 @@ class BulkSkuWidget extends StringTextfieldWidget {
       if ($all['not_used_combination']) {
         foreach ($all['not_used_combination'] as $attribute_name => $id) {
           $form[$attribute_name]['widget']['#default_value'] = [$id];
-          $form[$attribute_name]['widget']['#value'] = [$id];
         }
       }
       $setup_link = $this->t('<a href=":href" target="_blank">Set up default SKU.</a>', [':href' => '/admin/commerce/config/product-variation-types/' . $variation->bundle() . '/edit/form-display']);
