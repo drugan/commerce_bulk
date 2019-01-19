@@ -46,7 +46,12 @@ class VariationDuplicate extends ConfigurableActionBase {
         ':href' => '/admin/commerce/config/product-variation-types/' . $variation->bundle() . '/edit/form-display'
         ]),
       ];
-
+      $form['max_execution_time'] = [
+        '#type' => 'number',
+        '#title' => new TranslatableMarkup('Temporarily increase php.ini <span style="color:red">max_execution_time</span> setting. Leave empty to apply default <span style="color:red">%max_execution_time</span> seconds.', ['%max_execution_time' => ini_get('max_execution_time')]),
+        '#min' => '0',
+        '#step' => '1',
+      ];
       $options = $creator->getAttributeFieldOptionIds($variation);
       // First, move selected variation to the bottom.
       foreach ($variations as $index => $variation) {
@@ -116,6 +121,9 @@ class VariationDuplicate extends ConfigurableActionBase {
     if ($form_state->getTriggeringElement()['#id'] != 'edit-cancel') {
       if (($kit = $form_state->get('kit')) && $kit['all']['not_used_combinations']) {
         $values = $form_state->getValues();
+        if ($values['max_execution_time']) {
+          ini_set('max_execution_time', $values['max_execution_time']);
+        };
         $attributes = [];
         foreach (array_keys($kit['options']['options']) as $key) {
           $attributes[$key] = $values[$key];
@@ -128,7 +136,35 @@ class VariationDuplicate extends ConfigurableActionBase {
             }
           }
         }
-        $kit['product']->setVariations($kit['creator']->createAllProductVariations($kit['product'], [], $kit))->save();
+        $count = count($kit['all']['not_used_combinations']);
+        if ($count > 100) {
+          $count = 0;
+          $all = [];
+          $all['all']['last_variation'] = $kit['all']['last_variation'];
+          foreach ($kit['all']['not_used_combinations'] as $index => $combination) {
+            $count++;
+            $all['all']['not_used_combinations'][] = $combination;
+            if ($count == 100) {
+              if (isset($kit['variations'])) {
+                $all['variations'] = $kit['variations'];
+                unset($kit['variations']);
+              }
+              else {
+                $all['variations'] = $kit['product']->getVariations();
+              }
+              $kit['product']->setVariations($kit['creator']->createAllProductVariations($kit['product'], [], $all))->save();
+              $count = 0;
+              $all['all']['not_used_combinations'] = [];
+            }
+          }
+          if (!empty($all['all']['not_used_combinations'])) {
+            $all['variations'] = $kit['product']->getVariations();
+            $kit['product']->setVariations($kit['creator']->createAllProductVariations($kit['product'], [], $all))->save();
+          }
+        }
+        else {
+          $kit['product']->setVariations($kit['creator']->createAllProductVariations($kit['product'], [], $kit))->save();
+        }
       }
     }
   }
