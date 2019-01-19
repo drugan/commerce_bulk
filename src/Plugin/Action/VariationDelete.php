@@ -55,7 +55,19 @@ class VariationDelete extends ConfigurableActionBase {
       ];
       // Remove the "Action was applied to N items" message.
       \Drupal::messenger()->deleteByType('status');
+      // TODO: delete the fix below after a while.
+      $storage = \Drupal::entityTypeManager()->getStorage('commerce_product_variation');
+      $product = $variation->getProduct();
+      $ids = $product->getVariationIds();
+      $count = 0;
+      foreach ($storage->loadByproperties(['product_id' => $product->id()]) as $variation) {
+        if (!in_array($variation->id(), $ids)) {
+          $variation->delete();
+          $count++;
+        }
+      }
     }
+    $count && \Drupal::messenger()->addWarning(new TranslatableMarkup('Deleted %count orphaned variations. See more: <a href=":href" target="_blank">https://www.drupal.org/project/commerce_bulk/issues/3027034</a>', ['%count' => $count, ':href' => 'https://www.drupal.org/project/commerce_bulk/issues/3027034']));
 
     return $form;
   }
@@ -71,6 +83,7 @@ class VariationDelete extends ConfigurableActionBase {
         foreach ($variations as $index => $variation) {
           if (in_array($variation, $seleted_variations)) {
             unset($variations[$index]);
+            $variation->delete();
           }
         }
         $product->setVariations(array_values($variations))->save();
