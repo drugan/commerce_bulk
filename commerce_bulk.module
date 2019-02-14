@@ -7,7 +7,6 @@
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\commerce_bulk\Entity\BulkProductVariation;
-use Drupal\commerce_product\Entity\Product;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
@@ -65,9 +64,11 @@ function commerce_bulk_requirements($phase) {
  * Implements hook_form_BASE_FORM_ID_alter().
  */
 function commerce_bulk_form_views_form_commerce_bulk_variations_tab_commerce_bulk_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (!($product = \Drupal::request()->attributes->get('commerce_product'))) {
+    return;
+  }
   $creator = \Drupal::service('commerce_bulk.variations_creator');
   $messenger = \Drupal::messenger();
-  $product = Product::load(explode('/', \Drupal::request()->getRequestUri())[2]);
   $variations = $product->getVariations();
   $created = count($variations);
   $variations = $product->getVariations() ?: [$creator->getProductVariation($product)];
