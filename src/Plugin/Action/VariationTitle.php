@@ -9,15 +9,15 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
- * Activate or deactivate variation.
+ * Duplicate variation.
  *
  * @Action(
- *   id = "commerce_bulk_variation_status",
- *   label = @Translation("Change status"),
+ *   id = "commerce_bulk_variation_title",
+ *   label = @Translation("Change title"),
  *   type = "commerce_product_variation"
  * )
  */
-class VariationStatus extends ConfigurableActionBase {
+class VariationTitle extends ConfigurableActionBase {
 
   /**
    * {@inheritdoc}
@@ -33,21 +33,22 @@ class VariationStatus extends ConfigurableActionBase {
     $request = \Drupal::request();
     $storage = \Drupal::service('entity_type.manager')->getStorage('commerce_product_variation');
     if ($ids = explode('|', $request->query->get('ids'))) {
-      $count = count($ids);
-      $form_state->set('variations', $storage->loadMultiple($ids));
+      $variations = $storage->loadMultiple($ids);
+      $form_state->set('variations', array_values($variations));
+      $titles = '';
+      foreach ($variations as $variation) {
+        $titles .= $variation->getTitle() . PHP_EOL;
+      }
       $form['warning'] = [
-        '#markup' => new TranslatableMarkup('<h1>Change status of the <span style="color:red;font-weight:bolder;">@count</span> @variations.</h1>', [
-          '@count' => $count,
-          '@variations' => $count > 1 ? $this->t('variations') : $this->t('variation'),
+        '#markup' => new TranslatableMarkup('<h2>Note that for this action to work you should <span style="color:red">uncheck</span> the <a href=":href" target="_blank">Generate variation titles based on attribute values</a> checkbox.<h2>', [
+          ':href' => $variation->toUrl()::fromUserInput("/admin/commerce/config/product-variation-types/{$variation->bundle()}/edit")->toString(),
         ]),
       ];
-      $form['status'] = [
-        '#type' => 'radios',
-        '#options' => [
-          1 => $this->t('Publish'),
-          0  => $this->t('Unpublish'),
-        ],
-        '#default_value' => 1,
+      $form['titles'] = [
+        '#type' => 'textarea',
+        '#title' => $this->t('Titles'),
+        '#default_value' => $titles,
+        '#rows' => 20,
       ];
       $form['cancel'] = [
       '#type' => 'submit',
@@ -66,9 +67,12 @@ class VariationStatus extends ConfigurableActionBase {
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     if ($form_state->getTriggeringElement()['#id'] != 'edit-cancel') {
-      $status = (bool) $form_state->getValue('status');
-      foreach ($form_state->get('variations') as $variation) {
-        $variation->setActive($status)->save();
+      $storage = \Drupal::service('entity_type.manager')->getStorage('commerce_product_variation');
+      $titles = explode(PHP_EOL, trim($form_state->getValue('titles')));
+      foreach ($form_state->get('variations') as $index => $variation) {
+        if ($title = isset($titles[$index]) ? trim($titles[$index]) : FALSE) {
+          $variation->setTitle($title)->save();
+        }
       }
     }
   }
@@ -101,7 +105,7 @@ class VariationStatus extends ConfigurableActionBase {
    * {@inheritdoc}
    */
   public function access($variation, AccountInterface $account = NULL, $return_as_object = FALSE) {
-    $result = $variation->access('update', $account, TRUE);
+    $result = $variation->access('delete', $account, TRUE);
 
     return $return_as_object ? $result : $result->isAllowed();
   }

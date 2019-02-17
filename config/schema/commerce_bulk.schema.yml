@@ -22,6 +22,9 @@ action.configuration.commerce_bulk_variation_status:
 action.configuration.commerce_bulk_variation_top:
   type: action_configuration_default
   label: 'Configuration for the Move to top action'
+action.configuration.commerce_bulk_variation_title:
+  type: action_configuration_default
+  label: 'Configuration for the Change title action'
 field.widget.settings.commerce_bulk_sku:
   type: mapping
   label: 'Commerce Creator SKU format settings'
