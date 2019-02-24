@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - commerce_product
+    - action
+id: commerce_bulk_attribute_value_top
+label: 'Move to top'
+type: commerce_product_attribute_value
+plugin: commerce_bulk_attribute_value_top
+configuration: {  }

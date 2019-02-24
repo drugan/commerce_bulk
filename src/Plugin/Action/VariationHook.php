@@ -45,7 +45,7 @@ class VariationHook extends ConfigurableActionBase {
         'product_type' => $product->bundle(),
       ]);
       $form['warning'] = [
-        '#markup' => new TranslatableMarkup('<h1>Add custom data</h1><h3>You are about to invoke the <mark>hook_commerce_bulk_variation_alter()</mark> on <span style="color:red;font-weight:bolder;">@count</span> variations.</h3><h3>See example hook implementation in the commerce_bulk.module file:</h3><div style="border:1px solid grey">' . $readmehelp->highlightPhp($path, 21, 8) . '</div>', ['@count' => count($variations)]),
+        '#markup' => new TranslatableMarkup('<h1>Add custom data</h1><h3>You are about to invoke the <mark>hook_commerce_bulk_variation_alter()</mark> on <span style="color:red;font-weight:bolder;">@count</span> variations.</h3><h3>See example hook implementation in the commerce_bulk.module file:</h3><div style="border:1px solid grey">' . $readmehelp->highlightPhp($path, 18, 12) . '</div>', ['@count' => count($variations)]),
       ];
       $form['data'] = [
         '#type' => 'textarea',
@@ -53,9 +53,9 @@ class VariationHook extends ConfigurableActionBase {
         '#rows' => 20,
       ];
       $form['cancel'] = [
-      '#type' => 'submit',
-      '#value' => 'CANCEL AND BACK',
-      '#weight' => 1000,
+        '#type' => 'submit',
+        '#value' => 'CANCEL AND BACK',
+        '#weight' => 1000,
       ];
       // Remove the "Action was applied to N items" message.
       \Drupal::messenger()->deleteByType('status');
@@ -87,7 +87,10 @@ class VariationHook extends ConfigurableActionBase {
         $ids[] = $variation->id();
       }
       $url = $variation->toUrl();
-      $query = ['destination' => \Drupal::request()->getRequestUri(), 'ids' => implode('|', $ids),];
+      $query = [
+        'destination' => \Drupal::request()->getRequestUri(),
+        'ids' => implode('|', $ids),
+      ];
       $path = $url::fromUserInput('/admin/config/system/actions/configure/' . $this->getPluginId(), ['query' => $query])->toString();
       $response = new RedirectResponse($path);
       $response->send();

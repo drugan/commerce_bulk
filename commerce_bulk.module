@@ -8,6 +8,10 @@
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\commerce_bulk\Entity\BulkProductVariation;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\commerce_product\Entity\ProductAttributeInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\commerce_bulk\BulkEntityTypeInfo;
+use Drupal\commerce_product\Entity\ProductAttribute;
 
 /**
  * Implements hook_commerce_bulk_variation_alter().
@@ -44,20 +48,19 @@ function commerce_bulk_bulk_creator_sku_alter(&$sku, $settings, $variation) {
 }
 
 /**
- * Implements hook_requirements().
+ * Implements hook_TYPE_alter().
+ *
+ * Allows to alter an attribute value fields data.
+ *
+ * @see \Drupal\commerce_bulk\Plugin\Action\AttributeValueName::submitConfigurationForm()
  */
-function commerce_bulk_requirements($phase) {
-  $requirements = [];
-  if (!\Drupal::moduleHandler()->moduleExists('action')) {
-    $requirements['commerce_bulk'] = [
-      'title' => 'Commerce Bulk',
-      'value' => 'Unmet dependency',
-      'severity' => REQUIREMENT_ERROR,
-      'description' => t('The Commerce Bulk requires both "Actions" module and "Variations Tab" view to be enabled.'),
-    ];
-  }
-
-  return $requirements;
+function commerce_bulk_commerce_bulk_attribute_value_alter(ProductAttributeValue &$attribute, &$name, $data) {
+  // Do required changes optionally using $data passed.
+  // Enable core `Serialization' module to decode 'json' or 'xml' data passed on
+  // the VBO action configuration page and use that to alter $attribute / $name:
+  // static $array_data;
+  // $array_data = $array_data ?: \Drupal::service('serializer')->decode($data, 'json');
+  // Note that $attribute will be saved later by the hook caller.
 }
 
 /**
@@ -74,10 +77,10 @@ function commerce_bulk_form_views_form_commerce_bulk_variations_tab_commerce_bul
   $variations = $product->getVariations() ?: [$creator->getProductVariation($product)];
   $all = $creator->getNotUsedAttributesCombination($variations);
   extract($all);
-  $form['#markup'] = new TranslatableMarkup('<div><h3>Variations:</h3><ul><li>Maximum: @count</li><li>Created: <span style="font-weight:bolder;color:red;">@created</span></li><li>Not used: @not_used</li></ul></div>',[
-  '@count'=> $count,
-  '@created'=> $created,
-  '@not_used'=> $count - $created,
+  $form['#markup'] = new TranslatableMarkup('<div><h3>Variations:</h3><ul><li>Maximum: @count</li><li>Created: <span style="font-weight:bolder;color:red;">@created</span></li><li>Not used: @not_used</li></ul></div>', [
+    '@count' => $count,
+    '@created' => $created,
+    '@not_used' => $count - $created,
   ]);
   if ($duplicated) {
     $placeholders = [
@@ -91,8 +94,33 @@ function commerce_bulk_form_views_form_commerce_bulk_variations_tab_commerce_bul
 }
 
 /**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ */
+function commerce_bulk_form_views_form_commerce_bulk_attributes_attribute_page_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (!($id = \Drupal::request()->attributes->get('commerce_product_attribute'))
+    || !$attribute = ProductAttribute::load($id)
+  ) {
+    return;
+  }
+  $form['#markup'] = new TranslatableMarkup('<h3>Attribute values: <span style="color:red;">@count</span></h3>', [
+    '@count' => count($attribute->getValues()),
+  ]);
+}
+
+/**
  * Implements hook_entity_type_alter().
  */
 function commerce_bulk_entity_type_alter(array &$entity_types) {
   $entity_types['commerce_product_variation']->setClass(BulkProductVariation::class);
+}
+
+/**
+ * Implements hook_entity_operation().
+ */
+function commerce_bulk_entity_operation(EntityInterface $entity) {
+  if ($entity instanceof ProductAttributeInterface) {
+    return \Drupal::service('class_resolver')
+      ->getInstanceFromDefinition(BulkEntityTypeInfo::class)
+      ->entityOperation($entity);
+  }
 }

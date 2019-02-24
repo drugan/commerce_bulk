@@ -25,7 +25,7 @@ class VariationTop extends ActionBase {
       $product = $variation->getProduct();
       $all_variations = $product->getVariations();
       foreach ($all_variations as $index => $variation) {
-        if (in_array ($variation, $variations)) {
+        if (in_array($variation, $variations)) {
           unset($all_variations[$index]);
           $count--;
           if (!$count) {
@@ -33,7 +33,7 @@ class VariationTop extends ActionBase {
           }
         }
       }
-      $all_variations = array_values(array_merge($variations , $all_variations));
+      $all_variations = array_values(array_merge($variations, $all_variations));
       $product->setVariations($all_variations);
       $product->save();
     }

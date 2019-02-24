@@ -42,8 +42,8 @@ class VariationDuplicate extends ConfigurableActionBase {
       $form['warning'] = [
         '#markup' => new TranslatableMarkup('<h1>You are about to create <span style="color:red">@not_used</span> variations:</h1><h3>The number of created variations can be narrowed down by unselecting some attribute options below. Use <mark>Ctrl</mark> or <mark>Shift</mark> keys to select multiple options. Note that default maximum possible number of variations to create in one go is <span style="color:red">500</span>. If you experience problems when creating large amount of variations try to change this number on <a href=":href" target="_blank">the variation type SKU widget settings</a>. Also, the server <span style="color:red">php.ini</span> configuration file settings can be increased in order to be able to perform this operation.</h3>',
         [
-        '@not_used' => $all['not_used'],
-        ':href' => '/admin/commerce/config/product-variation-types/' . $variation->bundle() . '/edit/form-display'
+          '@not_used' => $all['not_used'],
+          ':href' => '/admin/commerce/config/product-variation-types/' . $variation->bundle() . '/edit/form-display',
         ]),
       ];
       $form['max_execution_time'] = [
@@ -72,7 +72,7 @@ class VariationDuplicate extends ConfigurableActionBase {
         '#type' => 'container',
         '#attributes' => ['class' => ['container-inline']],
       ];
-     $values = [];
+      $values = [];
       foreach ($all['not_used_combinations'] as $index => $combination) {
         foreach ($combination as $key => $value) {
           $values[$key][$value] = $value;
@@ -99,13 +99,13 @@ class VariationDuplicate extends ConfigurableActionBase {
             '#size' => $size,
             '#default_value' => array_keys($value),
             '#required' => $required,
-          ];        
+          ];
         }
       }
       $form['cancel'] = [
-      '#type' => 'submit',
-      '#value' => 'CANCEL AND BACK',
-      '#weight' => 1000,
+        '#type' => 'submit',
+        '#value' => 'CANCEL AND BACK',
+        '#weight' => 1000,
       ];
       // Remove the "Action was applied to N items" message.
       \Drupal::messenger()->deleteByType('status');

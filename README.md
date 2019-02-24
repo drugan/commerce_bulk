@@ -1,9 +1,8 @@
 Commerce Bulk
 =============
 
-Provides a service for bulk creation of *Drupal Commerce* entities. For now just
-product variations could be bulk created on a product add or edit form. Also,
-dummy products could be bulk generated if
+Provides a service for bulk creation of *Drupal Commerce* entities such
+as *attribute values* and *variations*. Also, products can be bulk generated if
 the [Commerce Generate ↗](https://github.com/drugan/commerce_bulk/tree/8.x-1.x/modules/commerce_generate)
 submodule is enabled.
 
@@ -11,26 +10,31 @@ submodule is enabled.
 the [admin/help#](#0 "? Help") link at the right of the *Admin toolbar* and then
 the [admin/help/commerce_bulk#](#0 "Commerce Bulk") link in the list.
 
-The module was created as a solution for the following *Drupal Commerce* issue:
-
-[Issue \#2755529: Product variant bulk creation ↗](https://www.drupal.org/node/2755529)
-
 ________________________________________________________________________________
 
+- [Commerce Bulk on drupal.org ↗](https://www.drupal.org/project/commerce_bulk)
+- [Commerce Bulk on github.com ↗](https://github.com/drugan/commerce_bulk)
 - [admin/help/commerce_bulk#info-for-developers](#info-for-developers "Info for developers")
 - [admin/help/commerce_bulk#todo](#todo "TODO")
 - [admin/help/commerce_bulk#module-author](#module-author "Module author")
-- [Commerce Bulk on drupal.org ↗](https://www.drupal.org/project/commerce_bulk)
-- [Commerce Bulk on github.com ↗](https://github.com/drugan/commerce_bulk)
 
 ________________________________________________________________________________
 
-After installing the module go to a product variation
-type *Manage form display* tab and check your settings for
-the *Commerce Bulk SKU* widget. As an example
+## Bulk variation actions
+
+After installing the module go to
+a [product/1/variations#](#0 "product/NNN/variations") tab and manage your
+variations using configurable *variation* actions which are self-explanatory and
+easy to use. Other contrib modules can add their own actions.
+
+![Variation Bulk Operations](images/created-6902.png "Variation Bulk Operations")
+
+________________________________________________________________________________
+
+To set up an auto _SKU_ pattern used for `**Duplicate variation**` action just
+press the `**Add variation**` button and then click on
 the [admin/commerce/config/product-variation-types/default/edit/form-display#](#0
-"default product variation type") is taken but actually all of the types should
-have the widget enabled by default.
+"Set up default SKU") link in the *SKU* field description.
 
 ![SKU widget](images/sku-widget.png "Commerce Bulk SKU widget")
 
@@ -49,98 +53,53 @@ that, despite the field is not visible, a valid *SKU* value will be generated on
 the backend for the field.
 - **prefix:** The text automatically prepended to a *SKU* value.
 - **suffix:** The text automatically appended to a *SKU* value.
-- **auto SKU sample:** The sample of the *SKU* that will be generated for the
-given product variation type.
+- **auto SKU sample:** The sample of
+the [unique SKU ↗](http://php.net/manual/en/function.uniqid.php) that will be
+generated for the given product variation type.
 
 ________________________________________________________________________________
 
-Note that finding which variation type is referenced by a product is quite easy
-with the module. Just open the product add / edit form, then
-open *Inline Entity Form* widget for adding / editing of variation and click on
-the [admin/commerce/config/product-variation-types/default/edit/form-display#](#0
-"Set up default SKU") link in the *SKU* field description. It leads you exactly
-to the page shown on the screenshot above. For demo purposes it was created a
-variation type with three attributes, each of them having 10 values (simple
-numbers). So, the total number of possible variatons is 1000.
+## Bulk attribute actions
+
+Press an attribute `**Bulk**` operation button while on
+the [admin/commerce/product-attributes#](#0 "Product attributes") page.
+
+![Attributes Bulk Operations](images/attributes-bulk.png "Attributes Bulk Operations")
 
 ________________________________________________________________________________
 
-![IEF widget](images/ief-widget.png "Inline Entity Form widget")
+Manage an _attribute values_ using configurable actions which are
+self-explanatory and easy to use. Other contrib modules can add their own
+actions.
 
-As you see the *SKU* and attribute fields are kindly pre-populated for you,
-though obviously all of them might be changed for any value, the auto
-generated [uniqid ↗](http://php.net/manual/en/function.uniqid.php) *SKU*
-including. On a new product the button for bulk creation of variations is
-disabled as the price and desirable currency are unknown before you create at
-least one variation.
+![Attribute Bulk Operations](images/attribute-bulk.png "Attribute Bulk Operations")
 
 ________________________________________________________________________________
-
-![Let's go](images/create-499.png "Let's go")
-
-OK, now the button is enabled and will display the statistics of the process.
-Remember, the default value for the **maximum** setting on
-the *Commerce Bulk SKU* widget was 500, we manually created 1 variation so,
-let's create the next 499 (500 - 1) variations by pressing the button.
-
-________________________________________________________________________________
-
-![Create 500](images/create-500.png "Create 500")
-
-Press the button once more.
-
-________________________________________________________________________________
-
-![Done 1000](images/done-1000.png "Done 1000")
-
-Done. Now, the `Create N variations` button has disappeared because there is
-no variations to create any more. This is quite useful feature of the module
-because even if variations were created manually by pressing
-the `Add new variation` button again and again, without the module you'd never
-know if you are not missed some variation.
-
-________________________________________________________________________________
-
-Also, with such a huge number of variations it may happen that you'd add some
-variation twice. In this case the module will display a warning.
-
-![Duplicated](images/duplicated.png "Duplicated")
-
-________________________________________________________________________________
-
 
 ## Info for developers
 
-All the above functionality is based on the `BulkVariationsCreator` service
+All the above functionality is based on the `**BulkVariationsCreator**` service
 which you can use in your custom module. For example, let's say you want to
 automatically create products with all possible or just a subset of
 variations. It's easy, just see how the *Commerce Generate* `GenerateProducts`
-plugin does it.
+plugin make it.
 
-@PHPFILE: modules/contrib/commerce_bulk/modules/commerce_generate/src/Plugin/DevelGenerate/GenerateProducts.php LINE:541 PADD:28 :PHPFILE@
+@PHPFILE: modules/contrib/commerce_bulk/modules/commerce_generate/src/Plugin/DevelGenerate/GenerateProducts.php LINE:576 PADD:18 :PHPFILE@
 
 ________________________________________________________________________________
 
 Also, see how the service is called in the `commerce_bulk.module` file.
 
-@PHPFILE: commerce_bulk.module LINE:48 PADD:4 :PHPFILE@
-
-________________________________________________________________________________
-
-The generated SKU might be altered by imlementing the `hook_TYPE_alter()`.
-
-@PHPFILE: commerce_bulk.module LINE:21 PADD:8 :PHPFILE@
+@PHPFILE: commerce_bulk.module LINE:98 PADD:5  :PHPFILE@
 
 ________________________________________________________________________________
 
 ## TODO
 
-- Apply mechanism for automatically adding variations images based on a certain
+- Apply mechanism to automatically add variation images based on a certain
 criteria.
-- Bulk edit / remove variatons in a tableselect element (tab or pop-up).
-- [Issue #2923799: Allow product variations to be named after the product name and variation title ↗](https://www.drupal.org/project/commerce/issues/2923799)
 - Create variations in a batch process. [Example ↗](https://www.drupal.org/project/commerce/issues/2902882#comment-12486526)
-- Add pager to the varaitions list.
+
 
 ###### Module author:
 ```

@@ -42,7 +42,7 @@ class VariationSKU extends ConfigurableActionBase {
         $skus .= $variation->getSku() . PHP_EOL;
       }
       $form['warning'] = [
-        '#markup' => new TranslatableMarkup('<h1>Note that each SKU must be <span style="color:red">unique</span> accross all SKUs existing on the current Drupal Commerce site and not exceed <span style="color:red">60</span> characters length.</h1><h3><mark>Tip:</mark> SKU for each variation can also be programmatically set for your needs while executing <mark>Duplicate variation</mark> action. See example hook implementation in the commerce_bulk.module file:</h3><div style="border:1px solid grey">' . $readmehelp->highlightPhp($path, 39, 9) . '</div>'),
+        '#markup' => new TranslatableMarkup('<h1>Note that each SKU must be <span style="color:red">unique</span> accross all SKUs existing on the current Drupal Commerce site and not exceed <span style="color:red">60</span> characters length.</h1><h3><mark>Tip:</mark> SKU for each variation can also be programmatically set in the <mark>hook_bulk_creator_sku_alter()</mark> for your needs while executing <mark>Duplicate variation</mark> action. See example hook implementation in the commerce_bulk.module file:</h3><div style="border:1px solid grey">' . $readmehelp->highlightPhp($path, 41, 6) . '</div>'),
       ];
       $form['skus'] = [
         '#type' => 'textarea',
@@ -51,9 +51,9 @@ class VariationSKU extends ConfigurableActionBase {
         '#rows' => 20,
       ];
       $form['cancel'] = [
-      '#type' => 'submit',
-      '#value' => 'CANCEL AND BACK',
-      '#weight' => 1000,
+        '#type' => 'submit',
+        '#value' => 'CANCEL AND BACK',
+        '#weight' => 1000,
       ];
       // Remove the "Action was applied to N items" message.
       \Drupal::messenger()->deleteByType('status');
@@ -80,7 +80,7 @@ class VariationSKU extends ConfigurableActionBase {
         }
       }
       if ($list) {
-        \Drupal::messenger()->addWarning(new TranslatableMarkup("<h3>The following SKUs were rejected as they already exist or more than 60 characters:</h3><ul>{$list}</ul>") );
+        \Drupal::messenger()->addWarning(new TranslatableMarkup("<h3>The following SKUs were rejected as they already exist or more than 60 characters:</h3><ul>{$list}</ul>"));
       }
     }
   }
@@ -95,7 +95,10 @@ class VariationSKU extends ConfigurableActionBase {
         $ids[] = $variation->id();
       }
       $url = $variation->toUrl();
-      $query = ['destination' => \Drupal::request()->getRequestUri(), 'ids' => implode('|', $ids),];
+      $query = [
+        'destination' => \Drupal::request()->getRequestUri(),
+        'ids' => implode('|', $ids),
+      ];
       $path = $url::fromUserInput('/admin/config/system/actions/configure/' . $this->getPluginId(), ['query' => $query])->toString();
       $response = new RedirectResponse($path);
       $response->send();

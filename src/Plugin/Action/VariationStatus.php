@@ -50,9 +50,9 @@ class VariationStatus extends ConfigurableActionBase {
         '#default_value' => 1,
       ];
       $form['cancel'] = [
-      '#type' => 'submit',
-      '#value' => 'CANCEL AND BACK',
-      '#weight' => 1000,
+        '#type' => 'submit',
+        '#value' => 'CANCEL AND BACK',
+        '#weight' => 1000,
       ];
       // Remove the "Action was applied to N items" message.
       \Drupal::messenger()->deleteByType('status');
@@ -83,7 +83,10 @@ class VariationStatus extends ConfigurableActionBase {
         $ids[] = $variation->id();
       }
       $url = $variation->toUrl();
-      $query = ['destination' => \Drupal::request()->getRequestUri(), 'ids' => implode('|', $ids),];
+      $query = [
+        'destination' => \Drupal::request()->getRequestUri(),
+        'ids' => implode('|', $ids),
+      ];
       $path = $url::fromUserInput('/admin/config/system/actions/configure/' . $this->getPluginId(), ['query' => $query])->toString();
       $response = new RedirectResponse($path);
       $response->send();

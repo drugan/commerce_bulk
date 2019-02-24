@@ -71,9 +71,9 @@ class VariationPriceAdjust extends ConfigurableActionBase {
         ],
       ];
       $form['cancel'] = [
-      '#type' => 'submit',
-      '#value' => 'CANCEL AND BACK',
-      '#weight' => 1000,
+        '#type' => 'submit',
+        '#value' => 'CANCEL AND BACK',
+        '#weight' => 1000,
       ];
       // Remove the "Action was applied to N items" message.
       \Drupal::messenger()->deleteByType('status');
@@ -95,7 +95,7 @@ class VariationPriceAdjust extends ConfigurableActionBase {
       $set = $values['price_type'] == 'list_price' ? 'setListPrice' : 'setPrice';
       $get = $values['price_type'] == 'list_price' ? 'getListPrice' : 'getPrice';
       $op = $values['adjust_op'] == 'add' ? 'add' : 'subtract';
-      
+
       foreach ($form_state->get('variations') as $variation) {
         if (!$price = $variation->$get()) {
           continue;
@@ -125,7 +125,10 @@ class VariationPriceAdjust extends ConfigurableActionBase {
         $ids[] = $variation->id();
       }
       $url = $variation->toUrl();
-      $query = ['destination' => \Drupal::request()->getRequestUri(), 'ids' => implode('|', $ids),];
+      $query = [
+        'destination' => \Drupal::request()->getRequestUri(),
+        'ids' => implode('|', $ids),
+      ];
       $path = $url::fromUserInput('/admin/config/system/actions/configure/' . $this->getPluginId(), ['query' => $query])->toString();
       $response = new RedirectResponse($path);
       $response->send();
