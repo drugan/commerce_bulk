@@ -452,7 +452,7 @@ display:
         style: true
         row: true
         sorts: true
-      path: admin/commerce-bulk-attribute/%id
+      path: admin/commerce-bulk-attribute/%commerce_product_attribute
       menu:
         type: none
         title: Xattribute
