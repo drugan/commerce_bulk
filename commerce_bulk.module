@@ -12,6 +12,7 @@ use Drupal\commerce_product\Entity\ProductAttributeInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\commerce_bulk\BulkEntityTypeInfo;
 use Drupal\commerce_product\Entity\ProductAttribute;
+use Drupal\commerce_product\Entity\ProductAttributeValueInterface;
 
 /**
  * Implements hook_commerce_bulk_variation_alter().
@@ -54,7 +55,7 @@ function commerce_bulk_bulk_creator_sku_alter(&$sku, $settings, $variation) {
  *
  * @see \Drupal\commerce_bulk\Plugin\Action\AttributeValueName::submitConfigurationForm()
  */
-function commerce_bulk_commerce_bulk_attribute_value_alter(ProductAttributeValue &$attribute, &$name, $data) {
+function commerce_bulk_commerce_bulk_attribute_value_alter(ProductAttributeValueInterface &$attribute, &$name, $data) {
   // Do required changes optionally using $data passed.
   // Enable core `Serialization' module to decode 'json' or 'xml' data passed on
   // the VBO action configuration page and use that to alter $attribute / $name:
