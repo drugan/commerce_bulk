@@ -84,8 +84,11 @@ function commerce_bulk_uninstall() {
     'system.action.commerce_bulk_variation_status',
     'system.action.commerce_bulk_variation_top',
     'system.action.commerce_bulk_variation_zdelete',
+    'system.action.commerce_bulk_term_duplicate',
+    'system.action.commerce_bulk_term_zdelete',
     'views.view.commerce_bulk_attributes',
     'views.view.commerce_bulk_variations_tab',
+    'views.view.commerce_bulk_taxonomy',
   ];
 
   foreach ($configurations as $name) {
@@ -105,6 +108,24 @@ function commerce_bulk_update_8201() {
     'system.action.commerce_bulk_attribute_value_top',
     'system.action.commerce_bulk_attribute_value_zdelete',
     'views.view.commerce_bulk_attributes',
+  ];
+  foreach ($configurations as $name) {
+    if ($configuration = $config->getEditable($name)) {
+      $data = Yaml::decode(file_get_contents(__DIR__ . "/config/install/{$name}.yml"));
+      $configuration->setData($data)->save();
+    }
+  }
+}
+
+/**
+ * Install Commerce Bulk Taxonomy view and actions.
+ */
+function commerce_bulk_update_8202() {
+  $config = \Drupal::configFactory();
+  $configurations = [
+    'system.action.commerce_bulk_term_duplicate',
+    'system.action.commerce_bulk_term_zdelete',
+    'views.view.commerce_bulk_taxonomy',
   ];
   foreach ($configurations as $name) {
     if ($configuration = $config->getEditable($name)) {

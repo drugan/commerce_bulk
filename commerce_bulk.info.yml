@@ -2,11 +2,12 @@ name: 'Commerce Bulk'
 type: module
 description: 'Provides a service for bulk creation of Drupal Commerce entities.'
 core: 8.x
-package: Commerce (contrib)
+package: 'Commerce (contrib)'
 dependencies:
-  - commerce:commerce_order
-  - drupal:readmehelp
-  - drupal:action
+  - 'commerce:commerce_order'
+  - 'drupal:readmehelp'
+  - 'drupal:action'
+  - 'drupal:taxonomy'
 config_devel:
   install:
     - system.action.commerce_bulk_variation_duplicate
@@ -21,5 +22,8 @@ config_devel:
     - system.action.commerce_bulk_attribute_value_top
     - system.action.commerce_bulk_attribute_value_name
     - system.action.commerce_bulk_attribute_value_zdelete
+    - system.action.commerce_bulk_term_duplicate
+    - system.action.commerce_bulk_term_zdelete
     - views.view.commerce_bulk_attributes
     - views.view.commerce_bulk_variations_tab
+    - views.view.commerce_bulk_taxonomy

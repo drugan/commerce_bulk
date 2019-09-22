@@ -68,6 +68,15 @@ the [admin/commerce/product-attributes#](#0 "Product attributes") page.
 
 ________________________________________________________________________________
 
+## Bulk taxonomy term actions
+
+Press an attribute `**Bulk**` operation button while on
+the [admin/structure/taxonomy#](#0 "Taxonomy terms") page.
+
+![Taxonomy Term Bulk Operations](images/terms-bulk.png "Taxonomy Term Bulk Operations")
+
+________________________________________________________________________________
+
 Manage an _attribute values_ using configurable actions which are
 self-explanatory and easy to use. Other contrib modules can add their own
 actions.
@@ -84,13 +93,13 @@ automatically create products with all possible or just a subset of
 variations. It's easy, just see how the *Commerce Generate* `GenerateProducts`
 plugin make it.
 
-@PHPFILE: modules/contrib/commerce_bulk/modules/commerce_generate/src/Plugin/DevelGenerate/GenerateProducts.php LINE:576 PADD:18 :PHPFILE@
+@PHPFILE: modules/commerce_generate/src/Plugin/DevelGenerate/GenerateProducts.php LINE:576 PADD:18 :PHPFILE@
 
 ________________________________________________________________________________
 
 Also, see how the service is called in the `commerce_bulk.module` file.
 
-@PHPFILE: commerce_bulk.module LINE:98 PADD:5  :PHPFILE@
+@PHPFILE: commerce_bulk.module LINE:92 PADD:5  :PHPFILE@
 
 ________________________________________________________________________________
 

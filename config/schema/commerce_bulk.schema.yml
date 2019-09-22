@@ -34,6 +34,12 @@ action.configuration.commerce_bulk_attribute_value_name:
 action.configuration.commerce_bulk_attribute_value_zdelete:
   type: action_configuration_default
   label: 'Configuration for the Delete attributes action'
+action.configuration.commerce_bulk_term_duplicate:
+  type: action_configuration_default
+  label: 'Configuration for the Duplicate term action'
+action.configuration.commerce_bulk_term_zdelete:
+  type: action_configuration_default
+  label: 'Configuration for the Delete terms action'
 field.widget.settings.commerce_bulk_sku:
   type: mapping
   label: 'Commerce Creator SKU format settings'

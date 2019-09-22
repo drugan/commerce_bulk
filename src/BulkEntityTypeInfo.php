@@ -8,6 +8,7 @@ use Drupal\commerce_product\Entity\ProductAttributeInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\taxonomy\VocabularyInterface;
 
 /**
  * Manipulates entity type information.
@@ -68,9 +69,20 @@ class BulkEntityTypeInfo implements ContainerInjectionInterface {
         'weight' => -100,
         'url' => $url->fromRoute($route, $route_parameters, $options),
       ];
-
-      return $operations;
     }
+    elseif ($entity instanceof VocabularyInterface && $this->currentUser->hasPermission("administer taxonomy")) {
+      $url = $entity->toUrl();
+      $route = 'view.commerce_bulk_taxonomy.vocabulary_page';
+      $route_parameters = $url->getRouteParameters();
+      $options = $url->getOptions();
+      $operations['commerce_bulk_operations'] = [
+        'title' => $this->t('Bulk'),
+        'weight' => -100,
+        'url' => $url->fromRoute($route, $route_parameters, $options),
+      ];
+    }
+
+    return $operations;
   }
 
 }

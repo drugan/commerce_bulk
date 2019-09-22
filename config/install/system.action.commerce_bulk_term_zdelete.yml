@@ -1,0 +1,12 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - commerce_product
+    - action
+    - taxonomy
+id: commerce_bulk_term_zdelete
+label: 'Delete terms'
+type: taxonomy_term
+plugin: commerce_bulk_term_zdelete
+configuration: {  }

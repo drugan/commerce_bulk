@@ -6,7 +6,7 @@ dependencies:
     - commerce_product
     - user
 id: commerce_bulk_variations_tab
-label: 'Variations Tab'
+label: 'Commerce Bulk Variations'
 module: views
 description: ''
 tag: ''

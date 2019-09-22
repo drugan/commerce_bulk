@@ -13,6 +13,8 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\commerce_bulk\BulkEntityTypeInfo;
 use Drupal\commerce_product\Entity\ProductAttribute;
 use Drupal\commerce_product\Entity\ProductAttributeValueInterface;
+use Drupal\taxonomy\TermInterface;
+use Drupal\taxonomy\VocabularyInterface;
 
 /**
  * Implements hook_commerce_bulk_variation_alter().
@@ -65,6 +67,22 @@ function commerce_bulk_commerce_bulk_attribute_value_alter(ProductAttributeValue
 }
 
 /**
+ * Implements hook_TYPE_alter().
+ *
+ * Allows to alter an taxonomy term fields data.
+ *
+ * @see \Drupal\commerce_bulk\Plugin\Action\TermDuplicate::submitConfigurationForm()
+ */
+function commerce_bulk_commerce_bulk_term_new_alter(TermInterface &$term, &$name, $data) {
+  // Do required changes optionally using $data passed.
+  // Enable core `Serialization' module to decode 'json' or 'xml' data passed on
+  // the VBO action configuration page and use that to alter $term / $name:
+  // static $array_data;
+  // $array_data = $array_data ?: \Drupal::service('serializer')->decode($data, 'json');
+  // Note that $term will be saved later by the hook caller.
+}
+
+/**
  * Implements hook_form_BASE_FORM_ID_alter().
  */
 function commerce_bulk_form_views_form_commerce_bulk_variations_tab_commerce_bulk_alter(&$form, FormStateInterface $form_state, $form_id) {
@@ -109,6 +127,18 @@ function commerce_bulk_form_views_form_commerce_bulk_attributes_attribute_page_a
 }
 
 /**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ */
+function commerce_bulk_form_views_form_commerce_bulk_taxonomy_vocabulary_page_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if ($vid = \Drupal::request()->get('taxonomy_vocabulary')) {
+    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $form['#markup'] = new TranslatableMarkup('<h3>Number of terms: <span style="color:red;">@count</span></h3>', [
+      '@count' => count($storage->loadByProperties(['vid' => $vid])),
+    ]);
+  }
+}
+
+/**
  * Implements hook_entity_type_alter().
  */
 function commerce_bulk_entity_type_alter(array &$entity_types) {
@@ -119,7 +149,8 @@ function commerce_bulk_entity_type_alter(array &$entity_types) {
  * Implements hook_entity_operation().
  */
 function commerce_bulk_entity_operation(EntityInterface $entity) {
-  if ($entity instanceof ProductAttributeInterface) {
+  if ($entity instanceof ProductAttributeInterface ||
+      $entity instanceof VocabularyInterface) {
     return \Drupal::service('class_resolver')
       ->getInstanceFromDefinition(BulkEntityTypeInfo::class)
       ->entityOperation($entity);

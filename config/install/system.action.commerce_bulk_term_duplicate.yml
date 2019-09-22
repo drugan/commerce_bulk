@@ -1,0 +1,12 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - commerce_product
+    - action
+    - taxonomy
+id: commerce_bulk_term_duplicate
+label: 'Duplicate term'
+type: taxonomy_term
+plugin: commerce_bulk_term_duplicate
+configuration: {  }
