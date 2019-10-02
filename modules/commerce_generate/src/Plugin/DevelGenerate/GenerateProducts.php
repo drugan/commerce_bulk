@@ -227,6 +227,15 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
       '#min' => 0,
     ];
 
+    $form['max_nb_skus'] = [
+      '#type' => 'number',
+      '#title' => $this->t('The maximum number of variations to generate per product.'),
+      '#default_value' => $this->getSetting('max_nb_skus'),
+      '#required' => FALSE,
+      '#step' => 1,
+      '#min' => 2,
+    ];
+
     $form['batch'] = [
       '#type' => 'number',
       '#title' => $this->t('The treshold for batch.'),
@@ -573,7 +582,7 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
     // @see commerce_generate_commerce_product_insert()
     $product->commerce_generate = $results;
 
-    $variations = $this->creator->createAllProductVariations($product, $values);
+    $variations = $this->creator->createAllProductVariations($product, $values, [], $results['max_nb_skus']);
     foreach ($variations as $variation) {
       // Generate custom field's sample value, such as variation image.
       $this->populateFields($variation);

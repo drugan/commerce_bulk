@@ -160,7 +160,7 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
   /**
    * {@inheritdoc}
    */
-  public function createAllProductVariations(Product $product, array $variation_custom_values = [], array $all = []) {
+  public function createAllProductVariations(Product $product, array $variation_custom_values = [], array $all = [], $max_nb_skus= NULL) {
     $timestamp = time();
     if (!$all) {
       $variations = $product->getVariations();
@@ -186,6 +186,7 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
     $more_entropy = isset($more_entropy) ? $more_entropy : FALSE;
     $module_handler = \Drupal::moduleHandler();
     $clone = clone $all['last_variation'];
+    $nb_skus=0;
     foreach ($all['not_used_combinations'] as $combination) {
       $variation = $all['last_variation']->createDuplicate()
         ->setChangedTime($timestamp)
@@ -202,6 +203,8 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
       // To avoid the same CreatedTime on multiple variations decrease the
       // $timestamp by one second instead of calling time() in the loop.
       $timestamp--;
+      $nb_skus++;
+      if (!empty($max_nb_skus) and $nb_skus > $max_nb_skus -2) break;
     }
 
     return $variations;

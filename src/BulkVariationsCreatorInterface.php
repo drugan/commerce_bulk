@@ -148,7 +148,7 @@ interface BulkVariationsCreatorInterface {
    * @see \Drupal\commerce_product\Entity\Product->getVariations()
    * @see self->getAllAttributesCombinations()
    */
-  public function createAllProductVariations(Product $product, array $variation_custom_values = [], array $all = []);
+  public function createAllProductVariations(Product $product, array $variation_custom_values = [], array $all = [], $max_nb_skus= NULL);
 
   /**
    * An AJAX callback to create all possible variations.
