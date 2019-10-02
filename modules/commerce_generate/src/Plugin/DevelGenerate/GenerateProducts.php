@@ -463,7 +463,7 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
     if (!$this->drushBatch) {
       // Setup the batch operations and save the variables.
       $operations[] = [
-        'commerce_generate_operation', [$this, 'batchPrepareroduct', $values],
+        'commerce_generate_operation', [$this, 'batchPrepareProduct', $values],
       ];
     }
     // Add the kill operation.
@@ -499,7 +499,7 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
   /**
    * {@inheritdoc}
    */
-  public function batchPrepareroduct($vars, &$context) {
+  public function batchPrepareProduct($vars, &$context) {
     if ($this->drushBatch) {
       $this->prepareGenerateProduct($vars);
     }
