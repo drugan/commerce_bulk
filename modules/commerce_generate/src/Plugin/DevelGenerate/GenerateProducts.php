@@ -230,10 +230,18 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
     $form['max_nb_skus'] = [
       '#type' => 'number',
       '#title' => $this->t('The maximum number of variations to generate per product.'),
+      '#description' => $this->t('Leave empty to generate all possible variations.'),
       '#default_value' => $this->getSetting('max_nb_skus'),
       '#required' => FALSE,
       '#step' => 1,
       '#min' => 2,
+    ];
+
+    $form['shuffle_variations'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Shuffle variation combinations.'),
+      '#default_value' => $this->getSetting('shuffle_variations'),
+      '#description' => $this->t('Tick this checkbox if you want to randomize the order of the generated variations.'),
     ];
 
     $form['batch'] = [
@@ -581,8 +589,11 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
     // @see devel_generate_entity_insert()
     // @see commerce_generate_commerce_product_insert()
     $product->commerce_generate = $results;
-
-    $variations = $this->creator->createAllProductVariations($product, $values, [], $results['max_nb_skus']);
+    $all = [
+      'shuffle_variations' => $results['shuffle_variations'],
+      'max_nb_skus' => $results['max_nb_skus'],
+    ];
+    $variations = $this->creator->createAllProductVariations($product, $values, $all);
     foreach ($variations as $variation) {
       // Generate custom field's sample value, such as variation image.
       $this->populateFields($variation);

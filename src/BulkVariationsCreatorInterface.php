@@ -121,6 +121,9 @@ interface BulkVariationsCreatorInterface {
    * @param array $variation_custom_values
    *   (optional) An associative array of a variation property values which
    *   will be used to auto create sample variation.
+   * @param array $not_all
+   *   (optional) Additional settings to pass, such as the maximum number of
+   *   variation combinations to create.
    *
    * @return \Drupal\commerce_product\Entity\ProductVariation
    *   A commerce_product variation.
@@ -128,7 +131,7 @@ interface BulkVariationsCreatorInterface {
    * @see \Drupal\commerce_product\Entity\ProductVariation->create()
    * @see self->createAllProductVariations()
    */
-  public function createProductVariation(Product $product, array $variation_custom_values = []);
+  public function createProductVariation(Product $product, array $variation_custom_values = [], array $not_all = []);
 
   /**
    * Creates all possible variations for commerce_product.
@@ -148,7 +151,7 @@ interface BulkVariationsCreatorInterface {
    * @see \Drupal\commerce_product\Entity\Product->getVariations()
    * @see self->getAllAttributesCombinations()
    */
-  public function createAllProductVariations(Product $product, array $variation_custom_values = [], array $all = [], $max_nb_skus= NULL);
+  public function createAllProductVariations(Product $product, array $variation_custom_values = [], array $all = []);
 
   /**
    * An AJAX callback to create all possible variations.
