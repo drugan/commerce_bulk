@@ -160,6 +160,33 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
   /**
    * {@inheritdoc}
    */
+  public function duplicateAllProductVariations(Product $product) {
+    if (!$variations = $product->getVariations()) {
+      return $variations;
+    }
+    if (!($product_id = $product->id())) {
+      $product->save();
+      $product_id = $product->id();
+    }
+    $settings = static::getSkuSettings(end($variations));
+    extract($settings);
+    $prefix = isset($prefix) ? $prefix : '';
+    $suffix = isset($suffix) ? $suffix : '';
+    $more_entropy = isset($more_entropy) ? $more_entropy : FALSE;
+    $duplicates = [];
+    foreach ($variations as $variation) {
+      $duplicate = $variation->createDuplicate();
+      $duplicate->setSku(\uniqid($prefix, $more_entropy) . $suffix);
+      $duplicate->set('product_id', $product_id);
+      $duplicates[] = $duplicate;
+    }
+
+    return $duplicates;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function createAllProductVariations(Product $product, array $variation_custom_values = [], array $all = []) {
     $timestamp = time();
     $shuffle_variations = !empty($all['shuffle_variations']);
