@@ -111,8 +111,9 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
     $variation = end($variations);
     $timestamp = time();
     if (!$variation instanceof ProductVariation) {
+      $product_type = $this->entityTypeManager->getStorage('commerce_product_type')->load($product->bundle());
       $variation = $this->entityTypeManager->getStorage('commerce_product_variation')->create([
-        'type' => $product->getFieldDefinition('variations')->getSettings()['handler_settings']['target_bundles'][0],
+        'type' => $product_type->getVariationTypeId(),
         'created' => $timestamp,
         'changed' => $timestamp,
       ]);
