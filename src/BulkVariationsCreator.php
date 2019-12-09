@@ -114,6 +114,7 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
       $product_type = $this->entityTypeManager->getStorage('commerce_product_type')->load($product->bundle());
       $variation = $this->entityTypeManager->getStorage('commerce_product_variation')->create([
         'type' => $product_type->getVariationTypeId(),
+        'product_id' => $product->id(),
         'created' => $timestamp,
         'changed' => $timestamp,
       ]);
@@ -311,7 +312,7 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
     }
     $all['not_used_combination'] = reset($all['not_used_combinations']);
     // Rid of unecessary data which might be quite heavy.
-    unset($all['used_combinations'], $all['not_used_combinations'], $all['attributes']);
+    unset($all['used_combinations'], $all['not_used_combinations']);
 
     return $all;
   }
@@ -435,8 +436,17 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
    */
   public function getAttributeFieldOptionIds(ProductVariation $variation) {
     $count = 1;
-    $field_options = $ids = $options = [];
+    $field_options = $ids = $options = $attributeopt = [];
+    if (($product = $variation->getProduct()) && $product->attributeopt) {
+      $attributeopt = $product->attributeopt->value;
+    }
     foreach ($this->getAttributeFieldNames($variation) as $field_name => $values) {
+      if ($attributeopt) {
+        $values = array_filter($values, function ($k) use ($attributeopt, $field_name) {
+          return isset($attributeopt[$field_name][$k]);
+        }, ARRAY_FILTER_USE_KEY);
+      }
+
       $definition = $variation->get($field_name)->getFieldDefinition();
       $ids[$field_name] = $options[$field_name] = [];
       foreach ($values as $value) {
