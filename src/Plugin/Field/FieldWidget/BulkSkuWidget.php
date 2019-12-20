@@ -169,14 +169,18 @@ class BulkSkuWidget extends StringTextfieldWidget {
         $form['list_price']['widget'][0]['value']['#default_value'] = $price->toArray();
       }
       foreach ($all['attributes']['options'] as $attribute_name => $options) {
-        $form[$attribute_name]['widget']['#options'] = array_filter($form[$attribute_name]['widget']['#options'],
-        function ($k) use ($options) {
-          return $k == '_none' || isset($options[$k]);
-        }, ARRAY_FILTER_USE_KEY);
+        if (isset($form[$attribute_name]['widget']['#options'])) {
+          $form[$attribute_name]['widget']['#options'] = array_filter($form[$attribute_name]['widget']['#options'],
+            function ($k) use ($options) {
+              return $k == '_none' || isset($options[$k]);
+            }, ARRAY_FILTER_USE_KEY);
+        }
       }
       if ($all['not_used_combination']) {
         foreach ($all['not_used_combination'] as $attribute_name => $id) {
-          $form[$attribute_name]['widget']['#default_value'] = [$id];
+          if (isset($form[$attribute_name]['widget']['#default_value'])) {
+            $form[$attribute_name]['widget']['#default_value'] = [$id];
+          }
         }
       }
       $setup_link = $this->t('<a href=":href" target="_blank">Set up default SKU.</a>', [':href' => '/admin/commerce/config/product-variation-types/' . $variation->bundle() . '/edit/form-display']);
