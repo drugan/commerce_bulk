@@ -138,7 +138,7 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    $entity_manager = $container->get('entity.manager');
+    $entity_manager = $container->get('entity_type.manager');
     return new static(
       $configuration, $plugin_id, $plugin_definition,
       $entity_manager->getStorage('commerce_store'),
@@ -402,7 +402,7 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
         $this->generateSaveProduct($values);
         if ($this->isDrush8() && function_exists('drush_log') && $i % drush_get_option('feedback', 1000) == 0) {
           $now = time();
-          drush_log(dt('Completed @feedback products (@rate products/min)', [
+          \Drupal::logger(dt('Completed @feedback products (@rate products/min)', [
             '@feedback' => drush_get_option('feedback', 1000),
             '@rate' => (drush_get_option('feedback', 1000) * 60) / ($now - $start),
           ]), 'ok');
@@ -621,7 +621,9 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
    */
   public static function populateFields(EntityInterface $entity) {
     /** @var \Drupal\field\FieldConfigInterface[] $instances */
-    $instances = entity_load_multiple_by_properties('field_config', ['entity_type' => $entity->getEntityType()->id(), 'bundle' => $entity->bundle()]);
+    $instances = \Drupal::entityTypeManager()
+      ->getStorage('field_config')
+      ->loadByProperties(['entity_type' => $entity->getEntityType()->id(), 'bundle' => $entity->bundle()]);
 
     if ($skips = function_exists('drush_get_option') ? drush_get_option('skip-fields', '') : @$_REQUEST['skip-fields']) {
       foreach (explode(',', $skips) as $skip) {
@@ -670,7 +672,7 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
    */
   protected function getUsers() {
     $users = [];
-    $result = db_query_range("SELECT uid FROM {users}", 0, 50);
+    $result = \Drupal::database()->queryRange("SELECT uid FROM {users}", 0, 50);
     foreach ($result as $record) {
       $users[] = $record->uid;
     }
@@ -738,13 +740,13 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
       }
       $values += array_combine($keys, $args);
       if (!empty($values['stores'])) {
-        $values['stores'] = _convert_csv_to_array($values['stores']);
+        $values['stores'] = StringUtils::csvToArray($values['stores']);
       }
       if (!empty($values['product_types'])) {
-        $values['product_types'] = _convert_csv_to_array($values['product_types']);
+        $values['product_types'] = StringUtils::csvToArray($values['product_types']);
       }
       if (!empty($values['languages'])) {
-        $values['languages'] = _convert_csv_to_array($values['languages']);
+        $values['languages'] = StringUtils::csvToArray($values['languages']);
       }
       $values += $default_settings;
     }

@@ -3,6 +3,7 @@ name: 'Commerce Generate'
 description: 'Generate dummy products, ...'
 package: Commerce (contrib)
 core: 8.x
+core_version_requirement: ^8 || ^9
 tags:
  - developer
 dependencies:

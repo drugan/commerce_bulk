@@ -37,7 +37,7 @@ class BulkVariationsCreator implements BulkVariationsCreatorInterface {
    * {@inheritdoc}
    */
   public static function getSkuwidget(ProductVariation $variation) {
-    $form_display = entity_get_form_display($variation->getEntityTypeId(), $variation->bundle(), 'default');
+    $form_display = \Drupal::service('entity_display.repository')->getFormDisplay($variation->getEntityTypeId(), $variation->bundle(), 'default');
 
     return $form_display->getRenderer('sku');
   }
