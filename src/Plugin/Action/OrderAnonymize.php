@@ -92,10 +92,6 @@ class OrderAnonymize extends ConfigurableActionBase {
       // Remove the "Action was applied to N items" message.
       \Drupal::messenger()->deleteByType('status');
     }
-    $aaa = NULL;
-    if (current($orders) instanceof OrderInterface) {
-      $aaa = TRUE;
-    }
 
     return $form;
   }
@@ -104,10 +100,12 @@ class OrderAnonymize extends ConfigurableActionBase {
    * {@inheritdoc}
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $orders = (array) $form_state->get('orders');
-    $fields = (array) $form_state->getValue('fields');
-    $age = (int) $form_state->getValue('order_age');
-    $this->anonymizeEntities($orders, $fields, $age);
+    if ($form_state->getTriggeringElement()['#id'] != 'edit-cancel') {
+      $orders = (array) $form_state->get('orders');
+      $fields = (array) $form_state->getValue('fields');
+      $age = (int) $form_state->getValue('order_age');
+      $this->anonymizeEntities($orders, $fields, $age);
+    }
   }
 
   /**
