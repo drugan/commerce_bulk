@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - commerce_order
+    - action
+id: commerce_bulk_order_zanonymize
+label: 'Anonymize Order'
+type: commerce_order
+plugin: commerce_bulk_order_zanonymize
+configuration: {  }

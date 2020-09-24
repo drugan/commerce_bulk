@@ -86,6 +86,7 @@ function commerce_bulk_uninstall() {
     'system.action.commerce_bulk_variation_zdelete',
     'system.action.commerce_bulk_term_duplicate',
     'system.action.commerce_bulk_term_zdelete',
+    'system.action.commerce_bulk_order_zanonymize',
     'views.view.commerce_bulk_attributes',
     'views.view.commerce_bulk_variations_tab',
     'views.view.commerce_bulk_taxonomy',

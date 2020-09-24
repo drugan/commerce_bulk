@@ -23,7 +23,7 @@ function commerce_bulk_commerce_bulk_variation_alter(array &$variations, $data =
   if ($product_type == 'my_product_type') {
     // Optionally, decode 'json' or 'xml' data passed on the VBO action
     // configuration page and use that to alter variations.
-    // $array_data = \Drupal::service('serializer')->decode($data, 'json');
+    // $array_data = \Drupal::service('serializer')->decode($data, 'json');.
     foreach ($variations as $variation) {
       // Enable core `Serialization' module to decode the string $data.
       // Do something and save variation.
@@ -155,4 +155,31 @@ function commerce_bulk_entity_operation(EntityInterface $entity) {
       ->getInstanceFromDefinition(BulkEntityTypeInfo::class)
       ->entityOperation($entity);
   }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function commerce_bulk_cron() {
+  // Anonymize orders example.
+  /*
+  $manager = \Drupal::entityTypeManager();
+  if ($anonymizer = $manager->getStorage('action')->load('commerce_bulk_order_zanonymize')) {
+  $fields = [
+  'ip_address',
+  'billing_profile',
+  'shipping_profile',
+  'data',
+  'mail',
+  'field_my_field',
+  ];
+  $storage = $manager->getStorage('commerce_order');
+  $query = $storage->getQuery();
+  $query->accessCheck(FALSE);
+  // Select orders older than 365 days.
+  $query->condition('completed', \time() - (86400 * 365), '>');
+  $orders = $storage->loadMultiple($query->execute());
+  $anonymizer->getPlugin()->anonymizeEntities($orders, $fields);
+  }
+   */
 }

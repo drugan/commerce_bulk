@@ -14,6 +14,7 @@ ________________________________________________________________________________
 
 - [Commerce Bulk on drupal.org ↗](https://www.drupal.org/project/commerce_bulk)
 - [Commerce Bulk on github.com ↗](https://github.com/drugan/commerce_bulk)
+- [admin/help/commerce_bulk#anonymize-orders](#anonymize-orders "Anonymize Orders")
 - [admin/help/commerce_bulk#info-for-developers](#info-for-developers "Info for developers")
 - [admin/help/commerce_bulk#todo](#todo "TODO")
 - [admin/help/commerce_bulk#module-author](#module-author "Module author")
@@ -84,6 +85,22 @@ actions.
 ![Attribute Bulk Operations](images/attribute-bulk.png "Attribute Bulk Operations")
 
 ________________________________________________________________________________
+
+## Anonymize Orders
+
+Select orders to anonymize on the [admin/commerce/orders#](#0 "Orders") page and
+then select desirable fields on the action config form.
+
+
+![Anonymize Order](images/anonymize-orders.png "Anonymize orders action")
+
+See an example how orders or any other entity type can be anonymized on a cron
+job:
+
+@PHPFILE: commerce_bulk.module LINE:182 PADD:22  :PHPFILE@
+
+________________________________________________________________________________
+
 
 ## Info for developers
 

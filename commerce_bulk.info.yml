@@ -20,6 +20,7 @@ config_devel:
     - system.action.commerce_bulk_variation_title
     - system.action.commerce_bulk_variation_top
     - system.action.commerce_bulk_variation_zdelete
+    - system.action.commerce_bulk_order_zanonymize
     - system.action.commerce_bulk_attribute_value_top
     - system.action.commerce_bulk_attribute_value_name
     - system.action.commerce_bulk_attribute_value_zdelete

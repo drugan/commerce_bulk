@@ -131,11 +131,11 @@ class TermDuplicate extends ConfigurableActionBase {
               if ($depth > $last_depth) {
                 $term->set('parent', $parents[$last_depth]);
               }
-              else if ($depth == $last_depth && !isset($parents[$depth -1])) {
+              elseif ($depth == $last_depth && !isset($parents[$depth - 1])) {
                 $term->set('parent', $prev->id());
               }
               else {
-                $term->set('parent', $parents[$depth -1]);
+                $term->set('parent', $parents[$depth - 1]);
               }
             }
             $term->setChangedTime($timestamp);
@@ -191,7 +191,7 @@ class TermDuplicate extends ConfigurableActionBase {
   /**
    * {@inheritdoc}
    */
-  public static function dashTerms($file = '', $match = '', $engfile = '', $array = NULL)  {
+  public static function dashTerms($file = '', $match = '', $engfile = '', $array = NULL) {
     $files = \Drupal::service('file_system');
     $file = $files->realpath("private://google/taxonomy-with-ids.{$file}.txt");
     if (file_exists($file)) {
