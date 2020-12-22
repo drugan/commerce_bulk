@@ -400,7 +400,11 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
       $start = time();
       for ($i = 1; $i <= $values['num']; $i++) {
         $this->generateSaveProduct($values);
-        if ($this->isDrush8() && function_exists('drush_log') && $i % drush_get_option('feedback', 1000) == 0) {
+        if (method_exists($this, 'isDrush8')
+          && $this->isDrush8()
+          && function_exists('drush_log')
+          && $this->isDrush8()
+          && $i % drush_get_option('feedback', 1000) == 0) {
           $now = time();
           \Drupal::logger(dt('Completed @feedback products (@rate products/min)', [
             '@feedback' => drush_get_option('feedback', 1000),
@@ -707,7 +711,7 @@ class GenerateProducts extends DevelGenerateBase implements ContainerFactoryPlug
     $default_settings = $this->getDefaultSettings();
     $values['num'] = array_shift($args);
 
-    if ($this->isDrush8()) {
+    if (method_exists($this, 'isDrush8') && $this->isDrush8()) {
       $keys = [
         'stores',
         'product-types',
